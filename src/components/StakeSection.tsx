@@ -2,20 +2,163 @@
 
 import { useState } from "react";
 import Card, { CardTitle, CardContent } from "./ui/Card";
+import { useStaking } from "@/hooks/useStaking";
+import { useAccount } from 'wagmi';
+import { useStakeAmount, useSetStakeAmount, useClearStakeAmount, useAddTransaction, useAppStore } from "@/stores";
 
 export default function StakeSection() {
-  const [amount, setAmount] = useState("");
+  const [isStaking, setIsStaking] = useState(false);
+  const { isConnected } = useAccount();
+  const { 
+    tokenBalance, 
+    tokenSymbol, 
+    minStake, 
+    maxStake,
+    stake,
+    unstake,
+    claimRewards,
+    userRewards 
+  } = useStaking();
+
+  // Zustand store
+  const amount = useStakeAmount();
+  const setAmount = useSetStakeAmount();
+  const clearAmount = useClearStakeAmount();
+  const addTransaction = useAddTransaction();
+  const { addNotification, setLoading } = useAppStore();
+
+  const handleStake = async () => {
+    if (!amount || !isConnected) return;
+    
+    setIsStaking(true);
+    setLoading('staking', true);
+    
+    try {
+      await stake(amount);
+      
+      // Add transaction to store (using a placeholder hash for now)
+      const txHash = `stake_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        type: 'stake',
+        amount,
+        status: 'pending',
+      });
+      
+      // Add notification
+      addNotification({
+        type: 'success',
+        title: 'Staking Initiated',
+        message: `Staking ${amount} ${tokenSymbol} tokens`,
+      });
+      
+      clearAmount();
+    } catch (error) {
+      console.error('Staking failed:', error);
+      addNotification({
+        type: 'error',
+        title: 'Staking Failed',
+        message: error instanceof Error ? error.message : 'Unknown error occurred',
+      });
+    } finally {
+      setIsStaking(false);
+      setLoading('staking', false);
+    }
+  };
+
+  const handleUnstake = async () => {
+    if (!amount || !isConnected) return;
+    
+    setIsStaking(true);
+    setLoading('staking', true);
+    
+    try {
+      await unstake(amount);
+      
+      // Add transaction to store (using a placeholder hash for now)
+      const txHash = `unstake_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        type: 'unstake',
+        amount,
+        status: 'pending',
+      });
+      
+      // Add notification
+      addNotification({
+        type: 'success',
+        title: 'Unstaking Initiated',
+        message: `Unstaking ${amount} ${tokenSymbol} tokens`,
+      });
+      
+      clearAmount();
+    } catch (error) {
+      console.error('Unstaking failed:', error);
+      addNotification({
+        type: 'error',
+        title: 'Unstaking Failed',
+        message: error instanceof Error ? error.message : 'Unknown error occurred',
+      });
+    } finally {
+      setIsStaking(false);
+      setLoading('staking', false);
+    }
+  };
+
+  const handleClaimRewards = async () => {
+    if (!isConnected) return;
+    
+    setLoading('claiming', true);
+    
+    try {
+      await claimRewards();
+      
+      // Add transaction to store (using a placeholder hash for now)
+      const txHash = `claim_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      addTransaction({
+        hash: txHash,
+        type: 'claim',
+        amount: userRewards,
+        status: 'pending',
+      });
+      
+      // Add notification
+      addNotification({
+        type: 'success',
+        title: 'Rewards Claimed',
+        message: `Claimed ${userRewards} ${tokenSymbol} rewards`,
+      });
+    } catch (error) {
+      console.error('Claim rewards failed:', error);
+      addNotification({
+        type: 'error',
+        title: 'Claim Failed',
+        message: error instanceof Error ? error.message : 'Unknown error occurred',
+      });
+    } finally {
+      setLoading('claiming', false);
+    }
+  };
+
+  const isValidAmount = amount && parseFloat(amount) > 0 && parseFloat(amount) <= parseFloat(tokenBalance);
+  const canStake = isValidAmount && parseFloat(amount) >= parseFloat(minStake) && parseFloat(amount) <= parseFloat(maxStake);
 
   return (
     <Card>
-      <CardTitle>Stake Tokens</CardTitle>
+      <CardTitle>Stake {tokenSymbol}</CardTitle>
       
       <CardContent>
         <div className="space-y-4">
+          {/* Balance info */}
+          <div className="text-sm" style={{ color: 'var(--color-muted)' }}>
+            Balance: {tokenBalance} {tokenSymbol}
+          </div>
+          
+          {/* Amount input */}
           <div>
             <input
-              type="text"
-              placeholder="Enter amount to stake"
+              type="number"
+              placeholder={`Enter amount to stake (min: ${minStake})`}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               className="w-full rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"
@@ -24,28 +167,116 @@ export default function StakeSection() {
                 border: '1px solid #404040',
                 color: 'var(--color-foreground)',
               }}
+              disabled={!isConnected}
             />
           </div>
-          
-          <button 
-            className="w-full font-bold py-3 rounded-lg text-black transition-all"
+
+          {/* Max button */}
+          <button
+            onClick={() => setAmount(tokenBalance)}
+            className="text-sm px-3 py-1 rounded border"
             style={{
-              background: `linear-gradient(135deg, #ffd700, #ffb347)`,
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              backgroundColor: 'transparent',
+              borderColor: 'var(--color-border)',
+              color: 'var(--color-foreground)',
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = `linear-gradient(135deg, #ffed4e, #ffa726)`;
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = `linear-gradient(135deg, #ffd700, #ffb347)`;
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-            }}
+            disabled={!isConnected}
           >
-            Stake
+            Max
           </button>
+          
+          {/* Action buttons */}
+          <div className="space-y-2">
+            <button 
+              onClick={handleStake}
+              disabled={!canStake || isStaking || !isConnected}
+              className="w-full font-bold py-3 rounded-lg text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                background: `linear-gradient(135deg, #ffd700, #ffb347)`,
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              }}
+              onMouseEnter={(e) => {
+                if (!e.currentTarget.disabled) {
+                  e.currentTarget.style.background = `linear-gradient(135deg, #ffed4e, #ffa726)`;
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!e.currentTarget.disabled) {
+                  e.currentTarget.style.background = `linear-gradient(135deg, #ffd700, #ffb347)`;
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                }
+              }}
+            >
+              {isStaking ? 'Staking...' : 'Stake'}
+            </button>
+
+            <button 
+              onClick={handleUnstake}
+              disabled={!isValidAmount || isStaking || !isConnected}
+              className="w-full font-bold py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: 'transparent',
+                border: '2px solid #ff4444',
+                color: '#ff4444',
+              }}
+              onMouseEnter={(e) => {
+                if (!e.currentTarget.disabled) {
+                  e.currentTarget.style.backgroundColor = '#ff4444';
+                  e.currentTarget.style.color = 'white';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!e.currentTarget.disabled) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#ff4444';
+                }
+              }}
+            >
+              {isStaking ? 'Unstaking...' : 'Unstake'}
+            </button>
+          </div>
+
+          {/* Claim rewards */}
+          {userRewards && parseFloat(userRewards) > 0 && (
+            <div className="pt-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
+              <div className="flex justify-between items-center mb-2">
+                <span style={{ color: 'var(--color-muted)' }}>Pending Rewards:</span>
+                <span style={{ color: 'var(--color-foreground)' }}>{userRewards} {tokenSymbol}</span>
+              </div>
+              <button 
+                onClick={handleClaimRewards}
+                disabled={!isConnected}
+                className="w-full font-bold py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: `linear-gradient(135deg, #00ff88, #00cc66)`,
+                  color: 'black',
+                }}
+                onMouseEnter={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.background = `linear-gradient(135deg, #00ffaa, #00dd77)`;
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.background = `linear-gradient(135deg, #00ff88, #00cc66)`;
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }
+                }}
+              >
+                Claim Rewards
+              </button>
+            </div>
+          )}
+
+          {!isConnected && (
+            <div className="text-center text-sm" style={{ color: 'var(--color-muted)' }}>
+              Connect your wallet to start staking
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

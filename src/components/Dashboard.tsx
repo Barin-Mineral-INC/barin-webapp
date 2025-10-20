@@ -6,6 +6,7 @@ import RewardChart from "./RewardChart";
 import StakeSection from "./StakeSection";
 import UserInfo from "./UserInfo";
 import VotingPower from "./VotingPower";
+import NotificationContainer from "./NotificationContainer";
 
 export default function Dashboard() {
   return (
@@ -27,6 +28,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      <NotificationContainer />
     </div>
   );
 }

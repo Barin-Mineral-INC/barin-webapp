@@ -1,37 +1,35 @@
 "use client";
 
-import { useTheme } from "@/contexts/ThemeContext";
 import Card, { CardHeader, CardTitle, CardAction, CardContent } from "./ui/Card";
 import MetricCard from "./ui/MetricCard";
+import { useStaking } from "@/hooks/useStaking";
 
 export default function PoolInfo() {
-  const { colors, theme } = useTheme();
+  const { 
+    totalStaked, 
+    apr, 
+    minStake, 
+    maxStake, 
+    tokenSymbol,
+    userStake
+  } = useStaking();
   
   const metrics = [
-    { label: "Total Staked", value: "$1.5B" },
-    { label: "Circulating vs Staked Supply", value: "70% Staked" },
-    { label: "Overall Participation", value: "25,000 Users" },
-    { label: "Next Distribution", value: "2d 15h" },
+    { label: "Total Staked", value: `${totalStaked} ${tokenSymbol}` },
+    { label: "APR", value: `${apr.toFixed(2)}%` },
+    { label: "Min/Max Stake", value: `${minStake}/${maxStake} ${tokenSymbol}` },
+    { label: "Your Staked", value: userStake ? `${userStake.amount} ${tokenSymbol}` : "0" },
   ];
 
   const pools = [
     {
-      type: "Flexible",
-      apr: "15%",
-      tvl: "$500M",
-      minMax: "10/100,000",
-      emission: "10/day",
-      health: "95% Utilized",
+      type: "Flexible Staking",
+      apr: `${apr.toFixed(2)}%`,
+      tvl: `${totalStaked} ${tokenSymbol}`,
+      minMax: `${minStake}/${maxStake}`,
+      emission: "Variable",
+      health: "Active",
       healthColor: "#00ff88",
-    },
-    {
-      type: "Locked (90 days)",
-      apr: "30%",
-      tvl: "$300M",
-      minMax: "100/1,000,000",
-      emission: "20/day",
-      health: "80% Utilized",
-      healthColor: "#ff8800",
     },
   ];
 

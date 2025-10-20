@@ -1,9 +1,13 @@
 "use client";
 
-import { useTheme } from "@/contexts/ThemeContext";
+import { useTheme, useChain, useThemeStore } from "@/stores";
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 export default function Header() {
-  const { theme, chain, colors, toggleTheme, setChain } = useTheme();
+  const theme = useTheme();
+  const chain = useChain();
+  const toggleTheme = useThemeStore((state) => state.toggleTheme);
+  const setChain = useThemeStore((state) => state.setChain);
 
   return (
     <header 
@@ -16,17 +20,15 @@ export default function Header() {
       <div className="flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center space-x-3">
-          <div 
-            className="w-8 h-8 rounded-sm flex items-center justify-center"
+          <img 
+            src="https://avatars.githubusercontent.com/u/213843539"
+            alt="Barin Logo"
+            className="w-8 h-8 rounded"
             style={{ 
-              background: `linear-gradient(135deg, #ffd700, #ffd700)` 
+              border: '2px solid var(--color-border)',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
             }}
-          >
-            <div 
-              className="w-4 h-4 rounded-sm rotate-45"
-              style={{ backgroundColor: '#000000' }}
-            ></div>
-          </div>
+          />
           <span 
             className="text-2xl font-bold"
             style={{ color: 'var(--color-foreground)' }}
@@ -40,7 +42,7 @@ export default function Header() {
           {/* Chain selector */}
           <select
             value={chain}
-            onChange={(e) => setChain(e.target.value as any)}
+            onChange={(e) => setChain(e.target.value as 'ethereum' | 'polygon' | 'arbitrum' | 'optimism' | 'base')}
             className="px-3 py-2 rounded-lg border transition-colors"
             style={{
               backgroundColor: 'var(--color-card)',
@@ -91,26 +93,8 @@ export default function Header() {
             )}
           </button>
 
-          {/* Create wallet button */}
-          <button 
-            className="font-semibold px-6 py-3 rounded-lg transition-all text-black"
-            style={{
-              background: `linear-gradient(135deg, #ffd700, #ffb347)`,
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = `linear-gradient(135deg, #ffed4e, #ffa726)`;
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = `linear-gradient(135deg, #ffd700, #ffb347)`;
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-            }}
-          >
-            Create wallet
-          </button>
+          {/* Wallet connection */}
+          <ConnectButton />
         </div>
       </div>
     </header>
