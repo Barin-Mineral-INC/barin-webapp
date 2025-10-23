@@ -59,11 +59,128 @@ export const ERC20_ABI = [
   },
 ] as const;
 
-// Staking contract ABI (simplified version)
+// Staking contract ABI (comprehensive version for pool management)
 export const STAKING_ABI = [
+  // Pool management functions
+  {
+    inputs: [],
+    name: 'poolLength',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'poolCount',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ name: 'pid', type: 'uint256' }],
+    name: 'poolInfo',
+    outputs: [
+      { name: 'lpToken', type: 'address' },
+      { name: 'allocPoint', type: 'uint256' },
+      { name: 'lastRewardBlock', type: 'uint256' },
+      { name: 'accRewardPerShare', type: 'uint256' },
+      { name: 'totalStaked', type: 'uint256' },
+      { name: 'isActive', type: 'bool' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'totalAllocPoint',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'rewardPerBlock',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'startBlock',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'endBlock',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  // User functions
+  {
+    inputs: [
+      { name: 'pid', type: 'uint256' },
+      { name: 'user', type: 'address' },
+    ],
+    name: 'userInfo',
+    outputs: [
+      { name: 'amount', type: 'uint256' },
+      { name: 'rewardDebt', type: 'uint256' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { name: 'pid', type: 'uint256' },
+      { name: 'user', type: 'address' },
+    ],
+    name: 'pendingRewards',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  // Staking functions
+  {
+    inputs: [
+      { name: 'pid', type: 'uint256' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    name: 'stake',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { name: 'pid', type: 'uint256' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    name: 'unstake',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [{ name: 'pid', type: 'uint256' }],
+    name: 'claimRewards',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  // Legacy functions for backward compatibility
   {
     inputs: [],
     name: 'totalStaked',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getTotalStaked',
     outputs: [{ name: '', type: 'uint256' }],
     stateMutability: 'view',
     type: 'function',
@@ -84,27 +201,6 @@ export const STAKING_ABI = [
     name: 'getUserRewards',
     outputs: [{ name: '', type: 'uint256' }],
     stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [{ name: 'amount', type: 'uint256' }],
-    name: 'stake',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [{ name: 'amount', type: 'uint256' }],
-    name: 'unstake',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'claimRewards',
-    outputs: [],
-    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
