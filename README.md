@@ -11,12 +11,6 @@ A modern DeFi staking dashboard built with Next.js, wagmi, and RainbowKit for th
 - 📱 **Responsive Design**: Beautiful UI that works on all devices
 - 🌙 **Dark Theme**: Modern dark theme with smooth transitions
 
-## Contract Addresses
-
-- **Staking Contract**: `0x611B40350e89063B3d0eb5D8349f57337F62E2b8`
-- **Barin Token**: `0x38FE57B61780B6B4E60aF0BFd7Fd791229D63a34`
-- **Network**: Polygon Amoy Testnet
-
 ## Getting Started
 
 ### Prerequisites
