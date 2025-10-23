@@ -5,18 +5,22 @@ import Card, { CardTitle, CardContent } from "./ui/Card";
 import { useStaking } from "@/hooks/useStaking";
 import { useAccount } from 'wagmi';
 import { useStakeAmount, useSetStakeAmount, useClearStakeAmount, useAddTransaction, useAppStore } from "@/stores";
+import { useBestPool } from "@/hooks/useBestPool";
 
 export default function StakeSection() {
   const [isStaking, setIsStaking] = useState(false);
-  const { isConnected } = useAccount();
+  const [selectedPoolId, setSelectedPoolId] = useState(0);
+  const { isConnected, address } = useAccount();
   const { 
+    pools,
     tokenBalance, 
-    tokenSymbol, 
+    tokenSymbol,
+    tokenDecimals,
     minStake, 
     maxStake,
-    stakeLegacy,
-    unstakeLegacy,
-    claimRewardsLegacy,
+    stake,
+    unstake,
+    claimRewards,
     userRewards 
   } = useStaking();
 
@@ -34,7 +38,7 @@ export default function StakeSection() {
     setLoading('staking', true);
     
     try {
-      await stakeLegacy(amount);
+      await stake(selectedPoolId, amount);
       
       // Add transaction to store (using a placeholder hash for now)
       const txHash = `stake_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -49,7 +53,7 @@ export default function StakeSection() {
       addNotification({
         type: 'success',
         title: 'Staking Initiated',
-        message: `Staking ${amount} ${tokenSymbol} tokens`,
+        message: `Staking ${amount} ${tokenSymbol} tokens to Pool ${selectedPoolId + 1}`,
       });
       
       clearAmount();
@@ -73,7 +77,7 @@ export default function StakeSection() {
     setLoading('staking', true);
     
     try {
-      await unstakeLegacy(amount);
+      await unstake(selectedPoolId, amount);
       
       // Add transaction to store (using a placeholder hash for now)
       const txHash = `unstake_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -88,7 +92,7 @@ export default function StakeSection() {
       addNotification({
         type: 'success',
         title: 'Unstaking Initiated',
-        message: `Unstaking ${amount} ${tokenSymbol} tokens`,
+        message: `Unstaking ${amount} ${tokenSymbol} tokens from Pool ${selectedPoolId + 1}`,
       });
       
       clearAmount();
@@ -111,7 +115,7 @@ export default function StakeSection() {
     setLoading('claiming', true);
     
     try {
-      await claimRewardsLegacy();
+      await claimRewards(selectedPoolId);
       
       // Add transaction to store (using a placeholder hash for now)
       const txHash = `claim_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -126,7 +130,7 @@ export default function StakeSection() {
       addNotification({
         type: 'success',
         title: 'Rewards Claimed',
-        message: `Claimed ${userRewards} ${tokenSymbol} rewards`,
+        message: `Claimed ${userRewards} ${tokenSymbol} rewards from Pool ${selectedPoolId + 1}`,
       });
     } catch (error) {
       console.error('Claim rewards failed:', error);
@@ -140,8 +144,16 @@ export default function StakeSection() {
     }
   };
 
+  // Get best pool recommendation based on stake amount
+  const { bestPoolId } = useBestPool(amount, tokenDecimals);
+
+  const selectedPool = pools.find(pool => pool.pid === selectedPoolId);
+  const poolMinStake = selectedPool ? selectedPool.minMax.split('/')[0] : minStake;
+  const userStakedInPool = selectedPool ? parseFloat(selectedPool.userStaked) : 0;
+  
   const isValidAmount = amount && parseFloat(amount) > 0 && parseFloat(amount) <= parseFloat(tokenBalance);
-  const canStake = isValidAmount && parseFloat(amount) >= parseFloat(minStake) && parseFloat(amount) <= parseFloat(maxStake);
+  const canStake = isValidAmount && parseFloat(amount) >= parseFloat(poolMinStake) && parseFloat(amount) <= parseFloat(tokenBalance);
+  const canUnstake = isValidAmount && parseFloat(amount) <= userStakedInPool && userStakedInPool > 0;
 
   return (
     <Card>
@@ -154,13 +166,45 @@ export default function StakeSection() {
             Balance: {tokenBalance} {tokenSymbol}
           </div>
           
+          {/* Pool selector */}
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-foreground)' }}>
+              Select Pool
+            </label>
+            <select
+              value={selectedPoolId}
+              onChange={(e) => setSelectedPoolId(Number(e.target.value))}
+              className="w-full rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              style={{
+                backgroundColor: '#333333',
+                border: '1px solid #404040',
+                color: 'var(--color-foreground)',
+              }}
+              disabled={!isConnected}
+            >
+              {pools.map((pool) => (
+                <option key={pool.pid} value={pool.pid}>
+                  Pool {pool.pid + 1} - Min: {pool.minMax.split('/')[0]} - Staked: {pool.userStaked}
+                </option>
+              ))}
+            </select>
+          </div>
+          
           {/* Amount input */}
           <div>
             <input
               type="number"
-              placeholder={`Enter amount to stake (min: ${minStake})`}
+              min="0"
+              step="any"
+              placeholder={`Enter amount to stake (min: ${poolMinStake})`}
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Only allow positive numbers or empty string
+                if (value === '' || parseFloat(value) >= 0) {
+                  setAmount(value);
+                }
+              }}
               className="w-full rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"
               style={{
                 backgroundColor: '#333333',
@@ -215,7 +259,7 @@ export default function StakeSection() {
 
             <button 
               onClick={handleUnstake}
-              disabled={!isValidAmount || isStaking || !isConnected}
+              disabled={!canUnstake || isStaking || !isConnected}
               className="w-full font-bold py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 backgroundColor: 'transparent',

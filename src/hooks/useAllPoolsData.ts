@@ -4,7 +4,7 @@ import { CONTRACTS, STAKING_ABI } from '@/lib/contracts';
 import { useMemo } from 'react';
 import { PoolInfo } from './useStaking';
 
-export function useAllPoolsData(tokenDecimals: number) {
+export function useAllPoolsData(tokenDecimals: number, userAddress?: string) {
   const { data: poolLength } = useReadContract({
     address: CONTRACTS.STAKING,
     abi: STAKING_ABI,
@@ -109,22 +109,23 @@ export function useAllPoolsData(tokenDecimals: number) {
         // Calculate end date and time for this specific pool
         const { endDate, endTime: endTimeStr } = calculateEndDateTime(endTime);
         
-        poolData.push({
-          pid: i,
-          lpToken: CONTRACTS.BARIN_TOKEN, // All pools use the same token
-          allocPoint: BigInt(0), // Not available in this ABI
-          lastRewardBlock: lastRewardTime, // Using lastRewardTime as equivalent
-          accRewardPerShare,
-          totalStaked,
-          isActive: exists,
-          minStake,
-          rewardPerSec, // Include rewardPerSec for total calculation
-          apr,
-          tvl,
-          minMax: `${minStakeFormatted}/∞`,
-          endDate,
-          endTime: endTimeStr,
-        });
+                poolData.push({
+                  pid: i,
+                  lpToken: CONTRACTS.BARIN_TOKEN, // All pools use the same token
+                  allocPoint: BigInt(0), // Not available in this ABI
+                  lastRewardBlock: lastRewardTime, // Using lastRewardTime as equivalent
+                  accRewardPerShare,
+                  totalStaked,
+                  isActive: exists,
+                  minStake,
+                  rewardPerSec, // Include rewardPerSec for total calculation
+                  apr,
+                  tvl,
+                  minMax: `${minStakeFormatted}/∞`,
+                  endDate,
+                  endTime: endTimeStr,
+                  userStaked: userAddress ? '0' : 'N/A', // Placeholder - will be updated when we have user staking data
+                });
       } else {
         // Fallback data if pool doesn't exist or is loading
         poolData.push({
@@ -142,6 +143,7 @@ export function useAllPoolsData(tokenDecimals: number) {
           minMax: '0/∞',
           endDate: 'N/A',
           endTime: 'N/A',
+          userStaked: userAddress ? '0' : 'N/A',
         });
       }
     }

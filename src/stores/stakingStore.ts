@@ -40,6 +40,10 @@ interface StakingState {
   setStakeAmount: (amount: string) => void;
   clearStakeAmount: () => void;
 
+  // Best pool recommendation
+  bestPoolId: number | null;
+  setBestPoolId: (poolId: number | null) => void;
+
   // Recent activity
   recentActivity: {
     lastStake?: Transaction;
@@ -128,6 +132,12 @@ export const useStakingStore = create<StakingState>()(
           set({ stakeAmount: '' });
         },
 
+        // Best pool recommendation
+        bestPoolId: null,
+        setBestPoolId: (poolId) => {
+          set({ bestPoolId: poolId });
+        },
+
         // Recent activity
         recentActivity: {},
         updateRecentActivity: (transaction) => {
@@ -187,6 +197,7 @@ export const useStakingStore = create<StakingState>()(
 export const useTransactions = () => useStakingStore((state) => state.transactions);
 export const useStakingPreferences = () => useStakingStore((state) => state.preferences);
 export const useStakeAmount = () => useStakingStore((state) => state.stakeAmount);
+export const useBestPoolId = () => useStakingStore((state) => state.bestPoolId);
 export const useRecentActivity = () => useStakingStore((state) => state.recentActivity);
 export const useStakingStats = () => useStakingStore((state) => state.stats);
 export const useQuickStakeAmounts = () => useStakingStore((state) => state.quickStakeAmounts);
@@ -194,6 +205,7 @@ export const useQuickStakeAmounts = () => useStakingStore((state) => state.quick
 // Action selectors
 export const useSetStakeAmount = () => useStakingStore((state) => state.setStakeAmount);
 export const useClearStakeAmount = () => useStakingStore((state) => state.clearStakeAmount);
+export const useSetBestPoolId = () => useStakingStore((state) => state.setBestPoolId);
 export const useAddTransaction = () => useStakingStore((state) => state.addTransaction);
 export const useUpdateTransaction = () => useStakingStore((state) => state.updateTransaction);
 export const useRemoveTransaction = () => useStakingStore((state) => state.removeTransaction);

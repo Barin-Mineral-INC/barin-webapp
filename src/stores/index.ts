@@ -25,6 +25,8 @@ export {
   useStakeAmount, 
   useSetStakeAmount,
   useClearStakeAmount,
+  useBestPoolId,
+  useSetBestPoolId,
   useAddTransaction,
   useUpdateTransaction,
   useRemoveTransaction,

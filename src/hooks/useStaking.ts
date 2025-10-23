@@ -20,6 +20,7 @@ export interface PoolInfo {
   minMax: string;
   endDate: string;
   endTime: string;
+  userStaked: string; // User's staked amount in this pool
   // Legacy fields for backward compatibility
   emission?: string;
   health?: string;
@@ -69,7 +70,7 @@ export function useStaking() {
   // These functions don't exist in the official ABI
 
   // Pool data fetching
-  const pools = useAllPoolsData(tokenDecimals || 18);
+  const pools = useAllPoolsData(tokenDecimals || 18, address);
 
   // Calculate total reward rate per second from all active pools (considering decimals)
   const totalRewardRatePerSecond = useMemo(() => {

@@ -4,6 +4,8 @@ import Card, { CardHeader, CardTitle, CardAction, CardContent } from "./ui/Card"
 import MetricCard from "./ui/MetricCard";
 import { useStaking } from "@/hooks/useStaking";
 import { formatUnits } from "viem";
+import { useBestPool } from "@/hooks/useBestPool";
+import { useStakeAmount } from "@/stores";
 
 export default function PoolInfo() {
   const {
@@ -22,6 +24,9 @@ export default function PoolInfo() {
     tokenDecimals,
     userStake
   } = useStaking();
+
+  const amount = useStakeAmount();
+  const { bestPoolId } = useBestPool(amount, tokenDecimals);
 
   const metrics = [
     { label: "Total Pools", value: poolLength.toString() },
@@ -106,9 +111,15 @@ export default function PoolInfo() {
                   </th>
                   <th 
                     className="px-4 py-5 text-center text-base font-medium"
-                    style={{ color: '#ffffff', width: '19%' }}
+                    style={{ color: '#ffffff', width: '15%' }}
                   >
                     End Time (UTC)
+                  </th>
+                  <th 
+                    className="px-4 py-5 text-center text-base font-medium"
+                    style={{ color: '#ffffff', width: '12%' }}
+                  >
+                    Your Staked
                   </th>
                 </tr>
               </thead>
@@ -160,12 +171,18 @@ export default function PoolInfo() {
                       >
                         {pool.endTime}
                       </td>
+                      <td 
+                        className="px-4 py-5 text-base text-right"
+                        style={{ color: '#ffffff' }}
+                      >
+                        {pool.userStaked}
+                      </td>
                     </tr>
                   ))
                 ) : (
                     <tr className="border-t" style={{ borderColor: '#404040' }}>
                       <td 
-                        colSpan={6}
+                        colSpan={7}
                         className="px-6 py-8 text-center text-base"
                         style={{ color: '#888888' }}
                       >
