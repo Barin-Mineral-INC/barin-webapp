@@ -3,17 +3,78 @@
 import Card, { CardTitle, CardContent } from "./ui/Card";
 import MetricCard from "./ui/MetricCard";
 import { useStaking } from "@/hooks/useStaking";
-import { useAccount } from 'wagmi';
+import { useAccount, useReadContract } from 'wagmi';
+import { CONTRACTS, STAKING_ABI } from "@/lib/contracts";
+import { readContract } from 'wagmi/actions';
+import { formatUnits } from "viem";
+import { useMemo, useEffect, useState } from "react";
+import { config } from '@/lib/wagmi';
 
 export default function UserInfo() {
   const { isConnected, address } = useAccount();
   const { 
     tokenBalance, 
-    tokenSymbol, 
+    tokenSymbol,
+    tokenDecimals,
+    poolLength,
+    pools,
     userStake, 
     userRewards, 
     apr 
   } = useStaking();
+
+  const [totalPendingRewards, setTotalPendingRewards] = useState('0');
+
+  // Fetch total staked across all pools for this user
+  const { data: totalStakedData } = useReadContract({
+    address: CONTRACTS.STAKING,
+    abi: STAKING_ABI,
+    functionName: 'getTotalStaked',
+    args: address ? [address] : undefined,
+  });
+
+  const totalStaked = useMemo(() => {
+    if (!totalStakedData || !tokenDecimals) return '0';
+    return formatUnits(totalStakedData as bigint, tokenDecimals);
+  }, [totalStakedData, tokenDecimals]);
+
+  // Fetch pending rewards dynamically for all pools
+  useEffect(() => {
+    const fetchPendingRewards = async () => {
+      if (!address || !poolLength || !tokenDecimals) {
+        setTotalPendingRewards('0');
+        return;
+      }
+
+      const numPools = Number(poolLength);
+      const rewardPromises = [];
+
+      for (let i = 0; i < numPools; i++) {
+        rewardPromises.push(
+          readContract(config, {
+            address: CONTRACTS.STAKING,
+            abi: STAKING_ABI,
+            functionName: 'pendingRewards',
+            args: [address as `0x${string}`, BigInt(i)],
+          })
+        );
+      }
+
+      try {
+        const rewards = await Promise.all(rewardPromises);
+        const total = rewards.reduce((sum, reward) => {
+          return sum + (reward ? (reward as bigint) : BigInt(0));
+        }, BigInt(0));
+        
+        setTotalPendingRewards(formatUnits(total, tokenDecimals));
+      } catch (error) {
+        console.error('Error fetching pending rewards:', error);
+        setTotalPendingRewards('0');
+      }
+    };
+
+    fetchPendingRewards();
+  }, [address, poolLength, tokenDecimals]);
 
   if (!isConnected) {
     return (
@@ -39,7 +100,7 @@ export default function UserInfo() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <MetricCard 
               label="Total Staked Amount" 
-              value={`0 ${tokenSymbol}`} // Not available in official ABI
+              value={`${totalStaked} ${tokenSymbol}`}
             />
             <MetricCard 
               label="Available Balance" 
@@ -48,7 +109,7 @@ export default function UserInfo() {
           </div>
           <MetricCard 
             label="Rewards Pending" 
-            value={`0 ${tokenSymbol}`} // Not available in official ABI
+            value={`${totalPendingRewards} ${tokenSymbol}`}
           />
         </div>
 

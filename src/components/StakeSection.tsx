@@ -162,8 +162,9 @@ export default function StakeSection() {
       <CardContent>
         <div className="space-y-4">
           {/* Balance info */}
-          <div className="text-sm" style={{ color: 'var(--color-muted)' }}>
-            Balance: {tokenBalance} {tokenSymbol}
+          <div className="flex justify-between text-sm" style={{ color: 'var(--color-muted)' }}>
+            <span>Balance: {tokenBalance} {tokenSymbol}</span>
+            <span>Staked: {userStakedInPool} {tokenSymbol}</span>
           </div>
           
           {/* Pool selector */}
