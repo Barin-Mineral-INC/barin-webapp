@@ -23,7 +23,7 @@ export default function UserInfo() {
     apr 
   } = useStaking();
 
-  const [totalPendingRewards, setTotalPendingRewards] = useState('0');
+  const [totalPendingRewards, setTotalPendingRewards] = useState('0.00');
 
   // Fetch total staked across all pools for this user
   const { data: totalStakedData } = useReadContract({
@@ -34,15 +34,16 @@ export default function UserInfo() {
   });
 
   const totalStaked = useMemo(() => {
-    if (!totalStakedData || !tokenDecimals) return '0';
-    return formatUnits(totalStakedData as bigint, tokenDecimals);
+    if (!totalStakedData || !tokenDecimals) return '0.00';
+    const formatted = formatUnits(totalStakedData as bigint, tokenDecimals);
+    return parseFloat(formatted).toFixed(2);
   }, [totalStakedData, tokenDecimals]);
 
   // Fetch pending rewards dynamically for all pools
   useEffect(() => {
     const fetchPendingRewards = async () => {
       if (!address || !poolLength || !tokenDecimals) {
-        setTotalPendingRewards('0');
+        setTotalPendingRewards('0.00');
         return;
       }
 
@@ -66,10 +67,11 @@ export default function UserInfo() {
           return sum + (reward ? (reward as bigint) : BigInt(0));
         }, BigInt(0));
         
-        setTotalPendingRewards(formatUnits(total, tokenDecimals));
+        const formatted = formatUnits(total, tokenDecimals);
+        setTotalPendingRewards(parseFloat(formatted).toFixed(2));
       } catch (error) {
         console.error('Error fetching pending rewards:', error);
-        setTotalPendingRewards('0');
+        setTotalPendingRewards('0.00');
       }
     };
 
@@ -104,7 +106,7 @@ export default function UserInfo() {
             />
             <MetricCard 
               label="Available Balance" 
-              value={`${tokenBalance} ${tokenSymbol}`} 
+              value={`${parseFloat(tokenBalance).toFixed(2)} ${tokenSymbol}`} 
             />
           </div>
           <MetricCard 
