@@ -14,9 +14,9 @@ export default function StakeSection() {
     tokenSymbol, 
     minStake, 
     maxStake,
-    stake,
-    unstake,
-    claimRewards,
+    stakeLegacy,
+    unstakeLegacy,
+    claimRewardsLegacy,
     userRewards 
   } = useStaking();
 
@@ -34,7 +34,7 @@ export default function StakeSection() {
     setLoading('staking', true);
     
     try {
-      await stake(amount);
+      await stakeLegacy(amount);
       
       // Add transaction to store (using a placeholder hash for now)
       const txHash = `stake_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -73,7 +73,7 @@ export default function StakeSection() {
     setLoading('staking', true);
     
     try {
-      await unstake(amount);
+      await unstakeLegacy(amount);
       
       // Add transaction to store (using a placeholder hash for now)
       const txHash = `unstake_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -111,7 +111,7 @@ export default function StakeSection() {
     setLoading('claiming', true);
     
     try {
-      await claimRewards();
+      await claimRewardsLegacy();
       
       // Add transaction to store (using a placeholder hash for now)
       const txHash = `claim_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
