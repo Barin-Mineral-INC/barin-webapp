@@ -39,7 +39,7 @@ export default function UserInfo() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <MetricCard 
               label="Total Staked Amount" 
-              value={userStake ? `${userStake.amount} ${tokenSymbol}` : `0 ${tokenSymbol}`} 
+              value={`0 ${tokenSymbol}`} // Not available in official ABI
             />
             <MetricCard 
               label="Available Balance" 
@@ -48,7 +48,7 @@ export default function UserInfo() {
           </div>
           <MetricCard 
             label="Rewards Pending" 
-            value={`${userRewards} ${tokenSymbol}`} 
+            value={`0 ${tokenSymbol}`} // Not available in official ABI
           />
         </div>
 
@@ -67,7 +67,7 @@ export default function UserInfo() {
         </div>
 
         {/* Staking Details */}
-        {userStake && parseFloat(userStake.amount) > 0 && (
+        {false && ( // Not available in official ABI
           <div className="space-y-4">
             <h3 className="text-lg font-semibold" style={{ color: 'var(--color-foreground)' }}>Staking Details</h3>
             
@@ -80,7 +80,7 @@ export default function UserInfo() {
                 <div>
                   <span style={{ color: 'var(--color-muted)' }}>Staked:</span>
                   <span className="ml-2" style={{ color: 'var(--color-foreground)' }}>
-                    {userStake.amount} {tokenSymbol}
+                    0 {tokenSymbol} {/* Not available in official ABI */}
                   </span>
                 </div>
                 <div>
@@ -92,13 +92,13 @@ export default function UserInfo() {
                 <div>
                   <span style={{ color: 'var(--color-muted)' }}>Staked Since:</span>
                   <span className="ml-2" style={{ color: 'var(--color-foreground)' }}>
-                    {new Date(Number(userStake.timestamp) * 1000).toLocaleDateString()}
+                    N/A {/* Not available in official ABI */}
                   </span>
                 </div>
                 <div>
                   <span style={{ color: 'var(--color-muted)' }}>Lock Time:</span>
                   <span className="ml-2" style={{ color: 'var(--color-foreground)' }}>
-                    {userStake.lockTime > 0 ? `${userStake.lockTime} days` : 'Flexible'}
+                    N/A {/* Not available in official ABI */}
                   </span>
                 </div>
               </div>
@@ -107,7 +107,7 @@ export default function UserInfo() {
         )}
 
         {/* No staking info */}
-        {(!userStake || parseFloat(userStake.amount) === 0) && (
+        {true && ( // Always show since userStake is not available
           <div className="text-center py-4" style={{ color: 'var(--color-muted)' }}>
             You haven&apos;t staked any tokens yet. Start staking to earn rewards!
           </div>

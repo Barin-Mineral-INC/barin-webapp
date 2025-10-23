@@ -24,7 +24,7 @@ export default function PoolInfo() {
     { label: "Total Pools", value: poolLength.toString() },
     { label: "Total Staked", value: `${totalStaked} ${tokenSymbol}` },
     { label: "Reward Rate", value: `${rewardPerBlock} ${tokenSymbol}/block` },
-    { label: "Your Staked", value: userStake ? `${userStake.amount} ${tokenSymbol}` : "0" },
+    { label: "Your Staked", value: "0" }, // Not available in official ABI
   ];
 
   return (
@@ -94,13 +94,13 @@ export default function PoolInfo() {
                     className="px-4 py-5 text-right text-base font-medium"
                     style={{ color: '#ffffff', width: '15%' }}
                   >
-                    Emission Rate
+                    End Date (UTC)
                   </th>
                   <th 
                     className="px-4 py-5 text-right text-base font-medium"
                     style={{ color: '#ffffff', width: '15%' }}
                   >
-                    Pool Health
+                    End Time (UTC)
                   </th>
                   <th 
                     className="px-4 py-5 text-center text-base font-medium"
@@ -145,12 +145,13 @@ export default function PoolInfo() {
                         className="px-4 py-5 text-base text-right"
                         style={{ color: '#ffffff' }}
                       >
-                        {pool.emission}
+                        {pool.endDate}
                       </td>
-                      <td className="px-4 py-5 text-right">
-                        <span className="text-base font-semibold" style={{ color: pool.healthColor }}>
-                          {pool.health}
-                        </span>
+                      <td 
+                        className="px-4 py-5 text-base text-right"
+                        style={{ color: '#ffffff' }}
+                      >
+                        {pool.endTime}
                       </td>
                       <td className="px-4 py-5 text-center">
                         <button 

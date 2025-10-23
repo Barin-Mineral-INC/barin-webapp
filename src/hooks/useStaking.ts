@@ -3,7 +3,7 @@ import { formatUnits, parseUnits } from 'viem';
 import { CONTRACTS, STAKING_ABI, ERC20_ABI } from '@/lib/contracts';
 import { useAccount } from 'wagmi';
 import { useMemo } from 'react';
-import { useAllPools } from './usePoolData';
+// import { useAllPoolsData } from './useAllPoolsData';
 
 export interface PoolInfo {
   pid: number;
@@ -13,12 +13,16 @@ export interface PoolInfo {
   accRewardPerShare: bigint;
   totalStaked: bigint;
   isActive: boolean;
+  minStake: bigint;
   apr: number;
   tvl: string;
   minMax: string;
-  emission: string;
-  health: string;
-  healthColor: string;
+  endDate: string;
+  endTime: string;
+  // Legacy fields for backward compatibility
+  emission?: string;
+  health?: string;
+  healthColor?: string;
 }
 
 export function useStaking() {
@@ -32,29 +36,7 @@ export function useStaking() {
     functionName: 'poolCount',
   });
 
-  const { data: totalAllocPoint } = useReadContract({
-    address: CONTRACTS.STAKING,
-    abi: STAKING_ABI,
-    functionName: 'totalAllocPoint',
-  });
-
-  const { data: rewardPerBlock } = useReadContract({
-    address: CONTRACTS.STAKING,
-    abi: STAKING_ABI,
-    functionName: 'rewardPerBlock',
-  });
-
-  const { data: startBlock } = useReadContract({
-    address: CONTRACTS.STAKING,
-    abi: STAKING_ABI,
-    functionName: 'startBlock',
-  });
-
-  const { data: endBlock } = useReadContract({
-    address: CONTRACTS.STAKING,
-    abi: STAKING_ABI,
-    functionName: 'endBlock',
-  });
+  // These functions don't exist in the official ABI
 
   // Token data
   const { data: tokenBalance } = useReadContract({
@@ -83,40 +65,10 @@ export function useStaking() {
     functionName: 'getTotalStaked',
   });
 
-  const { data: userStake } = useReadContract({
-    address: CONTRACTS.STAKING,
-    abi: STAKING_ABI,
-    functionName: 'getUserStake',
-    args: address ? [address] : undefined,
-  });
+  // These functions don't exist in the official ABI
 
-  const { data: userRewards } = useReadContract({
-    address: CONTRACTS.STAKING,
-    abi: STAKING_ABI,
-    functionName: 'getUserRewards',
-    args: address ? [address] : undefined,
-  });
-
-  const { data: apr } = useReadContract({
-    address: CONTRACTS.STAKING,
-    abi: STAKING_ABI,
-    functionName: 'getAPR',
-  });
-
-  const { data: minStake } = useReadContract({
-    address: CONTRACTS.STAKING,
-    abi: STAKING_ABI,
-    functionName: 'getMinStake',
-  });
-
-  const { data: maxStake } = useReadContract({
-    address: CONTRACTS.STAKING,
-    abi: STAKING_ABI,
-    functionName: 'getMaxStake',
-  });
-
-  // Pool data fetching
-  const pools = useAllPools(tokenDecimals || 18);
+  // Pool data fetching - using placeholder for now
+  const pools: PoolInfo[] = [];
 
   // Calculate APR for pools
   const calculatePoolAPR = (allocPoint: bigint, totalAllocPoint: bigint, rewardPerBlock: bigint, totalStaked: bigint) => {
@@ -162,18 +114,15 @@ export function useStaking() {
     writeContract({
       address: CONTRACTS.STAKING,
       abi: STAKING_ABI,
-      functionName: 'unstake',
+      functionName: 'withdraw',
       args: [BigInt(pid), amountWei],
     });
   };
 
   const claimRewards = async (pid: number) => {
-    writeContract({
-      address: CONTRACTS.STAKING,
-      abi: STAKING_ABI,
-      functionName: 'claimRewards',
-      args: [BigInt(pid)],
-    });
+    // Note: There's no direct claimRewards function in the official ABI
+    // Rewards are typically claimed when withdrawing or through a separate mechanism
+    console.log('Claim rewards not implemented in official ABI');
   };
 
   // Legacy functions for backward compatibility
@@ -207,18 +156,14 @@ export function useStaking() {
     writeContract({
       address: CONTRACTS.STAKING,
       abi: STAKING_ABI,
-      functionName: 'unstake',
+      functionName: 'withdraw',
       args: [BigInt(0), amountWei], // Default to pool 0 for legacy
     });
   };
 
   const claimRewardsLegacy = async () => {
-    writeContract({
-      address: CONTRACTS.STAKING,
-      abi: STAKING_ABI,
-      functionName: 'claimRewards',
-      args: [BigInt(0)], // Default to pool 0 for legacy
-    });
+    // Note: There's no direct claimRewards function in the official ABI
+    console.log('Claim rewards not implemented in official ABI');
   };
 
   // Format data for display
@@ -231,22 +176,18 @@ export function useStaking() {
     // Pool data
     pools,
     poolLength: poolLength ? Number(poolLength) : 0,
-    totalAllocPoint: totalAllocPoint ? Number(totalAllocPoint) : 0,
-    rewardPerBlock: formatTokenAmount(rewardPerBlock, tokenDecimals),
-    startBlock: startBlock ? Number(startBlock) : 0,
-    endBlock: endBlock ? Number(endBlock) : 0,
+    totalAllocPoint: 0, // Not available in official ABI
+    rewardPerBlock: '0', // Not available in official ABI
+    startBlock: 0, // Not available in official ABI
+    endBlock: 0, // Not available in official ABI
     
     // Legacy data for backward compatibility
     totalStaked: formatTokenAmount(totalStaked, tokenDecimals),
-    userStake: userStake ? {
-      amount: formatTokenAmount(userStake[0], tokenDecimals),
-      timestamp: userStake[1],
-      lockTime: userStake[2],
-    } : null,
-    userRewards: formatTokenAmount(userRewards, tokenDecimals),
-    apr: apr ? Number(apr) / 100 : 0, // Convert from basis points
-    minStake: formatTokenAmount(minStake, tokenDecimals),
-    maxStake: formatTokenAmount(maxStake, tokenDecimals),
+    userStake: null, // Not available in official ABI
+    userRewards: '0', // Not available in official ABI
+    apr: 0, // Not available in official ABI
+    minStake: '0', // Not available in official ABI
+    maxStake: '0', // Not available in official ABI
     tokenBalance: formatTokenAmount(tokenBalance, tokenDecimals),
     tokenSymbol: tokenSymbol || 'BARIN',
     

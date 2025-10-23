@@ -8,100 +8,84 @@ export function usePoolData(poolId: number, tokenDecimals: number) {
   const { data: poolInfo } = useReadContract({
     address: CONTRACTS.STAKING,
     abi: STAKING_ABI,
-    functionName: 'poolInfo',
+    functionName: 'pools',
     args: [BigInt(poolId)],
   });
 
-  const { data: totalAllocPoint } = useReadContract({
-    address: CONTRACTS.STAKING,
-    abi: STAKING_ABI,
-    functionName: 'totalAllocPoint',
-  });
-
-  const { data: rewardPerBlock } = useReadContract({
-    address: CONTRACTS.STAKING,
-    abi: STAKING_ABI,
-    functionName: 'rewardPerBlock',
-  });
+  // Note: The official ABI doesn't have totalAllocPoint or rewardPerBlock functions
+  // We'll calculate APR based on rewardPerSec from the pool data
 
   const poolData = useMemo(() => {
-    if (!poolInfo || !totalAllocPoint || !rewardPerBlock) {
+    if (!poolInfo) {
       return null;
     }
 
-    const [lpToken, allocPoint, lastRewardBlock, accRewardPerShare, totalStaked, isActive] = poolInfo;
-    
-    // Calculate APR
+    // Based on the official ABI, pools returns: [rewardPerSec, minStake, endTime, totalStaked, accRewardPerShare, lastRewardTime, exists]
+    const [rewardPerSec, minStake, endTime, totalStaked, accRewardPerShare, lastRewardTime, exists] = poolInfo;
+
+    // Calculate APR based on rewardPerSec
     const calculateAPR = () => {
-      if (!totalAllocPoint || !rewardPerBlock || !totalStaked || totalStaked === BigInt(0)) return 0;
+      if (!totalStaked || totalStaked === BigInt(0)) return 0;
       
-      // Assuming 2.5 seconds per block on Polygon
-      const blocksPerYear = BigInt(365 * 24 * 60 * 60 / 2.5);
-      const poolRewardPerBlock = (rewardPerBlock * allocPoint) / totalAllocPoint;
-      const annualRewards = poolRewardPerBlock * blocksPerYear;
-      
-      // Convert to percentage
-      return Number((annualRewards * BigInt(10000)) / totalStaked) / 100;
+      // Convert rewardPerSec to annual rewards
+      const annualRewards = rewardPerSec * BigInt(365 * 24 * 60 * 60);
+      const apr = Number(annualRewards) / Number(totalStaked) * 100;
+      return apr;
     };
 
     const apr = calculateAPR();
     const tvl = formatUnits(totalStaked, tokenDecimals);
-    
+    const minStakeFormatted = formatUnits(minStake, tokenDecimals);
+
+    // Calculate end date and time
+    const calculateEndDateTime = () => {
+      if (!endTime || endTime === BigInt(0)) return { endDate: 'N/A', endTime: 'N/A' };
+      
+      const endTimestamp = Number(endTime);
+      const endDate = new Date(endTimestamp * 1000);
+      
+      const endDateStr = endDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        timeZone: 'UTC'
+      });
+      
+      const endTimeStr = endDate.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: 'UTC',
+        hour12: false
+      });
+      
+      return { endDate: endDateStr, endTime: endTimeStr };
+    };
+
+    const { endDate, endTime: endTimeStr } = calculateEndDateTime();
+
     return {
       pid: poolId,
-      lpToken: lpToken as string,
-      allocPoint,
-      lastRewardBlock,
+      lpToken: CONTRACTS.BARIN_TOKEN, // All pools use the same token
+      allocPoint: BigInt(0), // Not available in this ABI
+      lastRewardBlock: lastRewardTime, // Using lastRewardTime as equivalent
       accRewardPerShare,
       totalStaked,
-      isActive,
+      isActive: exists,
+      minStake,
       apr,
       tvl,
-      minMax: '0/∞', // This would need to be fetched from contract if available
-      emission: 'Variable',
-      health: isActive ? 'Active' : 'Inactive',
-      healthColor: isActive ? '#00ff88' : '#ff6b6b',
+      minMax: `${minStakeFormatted}/∞`,
+      endDate,
+      endTime: endTimeStr,
     } as PoolInfo;
-  }, [poolInfo, totalAllocPoint, rewardPerBlock, poolId, tokenDecimals]);
+  }, [poolInfo, poolId, tokenDecimals]);
 
   return poolData;
 }
 
 export function useAllPools(tokenDecimals: number) {
-  const { data: poolLength } = useReadContract({
-    address: CONTRACTS.STAKING,
-    abi: STAKING_ABI,
-    functionName: 'poolCount',
-  });
-
-  const pools = useMemo(() => {
-    if (!poolLength || !tokenDecimals) return [];
-    
-    const poolData: PoolInfo[] = [];
-    const numPools = Number(poolLength);
-    
-    // For now, we'll create placeholder data
-    // In a real implementation, you'd want to fetch each pool individually
-    for (let i = 0; i < numPools; i++) {
-      poolData.push({
-        pid: i,
-        lpToken: CONTRACTS.BARIN_TOKEN,
-        allocPoint: BigInt(0),
-        lastRewardBlock: BigInt(0),
-        accRewardPerShare: BigInt(0),
-        totalStaked: BigInt(0),
-        isActive: true,
-        apr: 0,
-        tvl: '0',
-        minMax: '0/∞',
-        emission: 'Variable',
-        health: 'Active',
-        healthColor: '#00ff88',
-      });
-    }
-    
-    return poolData;
-  }, [poolLength, tokenDecimals]);
-
-  return pools;
+  // This function is now replaced by useAllPoolsData from the separate hook
+  // Keeping this for backward compatibility but it should use the new hook
+  return [];
 }
