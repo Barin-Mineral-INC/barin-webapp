@@ -6,8 +6,12 @@ import { useStaking } from "@/hooks/useStaking";
 import { formatUnits } from "viem";
 import { useBestPool } from "@/hooks/useBestPool";
 import { useStakeAmount } from "@/stores";
+import { useAccount, useReadContract } from "wagmi";
+import { CONTRACTS, STAKING_ABI } from "@/lib/contracts";
 
 export default function PoolInfo() {
+  const { address, isConnected } = useAccount();
+  
   const {
     pools,
     poolLength,
@@ -28,6 +32,23 @@ export default function PoolInfo() {
   const amount = useStakeAmount();
   const { bestPoolId } = useBestPool(amount, tokenDecimals);
 
+  // Fetch ADMIN_ROLE constant
+  const { data: adminRole } = useReadContract({
+    address: CONTRACTS.STAKING,
+    abi: STAKING_ABI,
+    functionName: 'ADMIN_ROLE',
+  });
+
+  // Check if connected address has ADMIN_ROLE
+  const { data: hasAdminRole } = useReadContract({
+    address: CONTRACTS.STAKING,
+    abi: STAKING_ABI,
+    functionName: 'hasRole',
+    args: adminRole && address ? [adminRole as `0x${string}`, address] : undefined,
+  });
+
+  const isAdmin = isConnected && hasAdminRole === true;
+
   const metrics = [
     { label: "Total Pools", value: poolLength.toString() },
     { label: "Total Staked", value: totalStaked },
@@ -40,18 +61,24 @@ export default function PoolInfo() {
         <CardTitle className="text-3xl">Pool / Protocol Information</CardTitle>
         <CardAction>
           <button 
-            className="font-semibold px-6 py-3 rounded-lg transition-all text-black text-lg"
+            hidden={!isAdmin}
+            disabled={!isAdmin}
+            className="font-semibold px-6 py-3 rounded-lg transition-all text-black text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               background: `linear-gradient(135deg, #ffd700, #ffb347)`,
               boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = `linear-gradient(135deg, #ffed4e, #ffa726)`;
-              e.currentTarget.style.transform = 'translateY(-1px)';
+              if (!e.currentTarget.disabled) {
+                e.currentTarget.style.background = `linear-gradient(135deg, #ffed4e, #ffa726)`;
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = `linear-gradient(135deg, #ffd700, #ffb347)`;
-              e.currentTarget.style.transform = 'translateY(0)';
+              if (!e.currentTarget.disabled) {
+                e.currentTarget.style.background = `linear-gradient(135deg, #ffd700, #ffb347)`;
+                e.currentTarget.style.transform = 'translateY(0)';
+              }
             }}
           >
             Add Pool
