@@ -3,7 +3,7 @@ import { formatUnits, parseUnits } from 'viem';
 import { CONTRACTS, STAKING_ABI, ERC20_ABI } from '@/lib/contracts';
 import { useAccount } from 'wagmi';
 import { useMemo } from 'react';
-// import { useAllPoolsData } from './useAllPoolsData';
+import { useAllPoolsData } from './useAllPoolsData';
 
 export interface PoolInfo {
   pid: number;
@@ -14,6 +14,7 @@ export interface PoolInfo {
   totalStaked: bigint;
   isActive: boolean;
   minStake: bigint;
+  rewardPerSec: bigint; // Added for total reward rate calculation
   apr: number;
   tvl: string;
   minMax: string;
@@ -67,8 +68,18 @@ export function useStaking() {
 
   // These functions don't exist in the official ABI
 
-  // Pool data fetching - using placeholder for now
-  const pools: PoolInfo[] = [];
+  // Pool data fetching
+  const pools = useAllPoolsData(tokenDecimals || 18);
+
+  // Calculate total reward rate per second from all active pools (considering decimals)
+  const totalRewardRatePerSecond = useMemo(() => {
+    const totalRewardPerSec = pools
+      .filter(pool => pool.isActive)
+      .reduce((sum, pool) => sum + pool.rewardPerSec, BigInt(0));
+    
+    // Format with proper decimals
+    return formatUnits(totalRewardPerSec, tokenDecimals || 18);
+  }, [pools, tokenDecimals]);
 
   // Calculate APR for pools
   const calculatePoolAPR = (allocPoint: bigint, totalAllocPoint: bigint, rewardPerBlock: bigint, totalStaked: bigint) => {
@@ -178,6 +189,7 @@ export function useStaking() {
     poolLength: poolLength ? Number(poolLength) : 0,
     totalAllocPoint: 0, // Not available in official ABI
     rewardPerBlock: '0', // Not available in official ABI
+    totalRewardRatePerSecond, // New field for total reward rate per second
     startBlock: 0, // Not available in official ABI
     endBlock: 0, // Not available in official ABI
     
@@ -190,6 +202,7 @@ export function useStaking() {
     maxStake: '0', // Not available in official ABI
     tokenBalance: formatTokenAmount(tokenBalance, tokenDecimals),
     tokenSymbol: tokenSymbol || 'BARIN',
+    tokenDecimals: tokenDecimals || 18,
     
     // Actions
     stake,

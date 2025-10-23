@@ -25,11 +25,16 @@ export function usePoolData(poolId: number, tokenDecimals: number) {
 
     // Calculate APR based on rewardPerSec
     const calculateAPR = () => {
-      if (!totalStaked || totalStaked === BigInt(0)) return 0;
+      if (!totalStaked || totalStaked === BigInt(0)) return Infinity; // Return Infinity for infinite APR
       
       // Convert rewardPerSec to annual rewards
       const annualRewards = rewardPerSec * BigInt(365 * 24 * 60 * 60);
-      const apr = Number(annualRewards) / Number(totalStaked) * 100;
+      
+      // Convert to numbers considering decimals for proper calculation
+      const annualRewardsNum = Number(formatUnits(annualRewards, tokenDecimals));
+      const totalStakedNum = Number(formatUnits(totalStaked, tokenDecimals));
+      
+      const apr = (annualRewardsNum / totalStakedNum) * 100;
       return apr;
     };
 
@@ -73,6 +78,7 @@ export function usePoolData(poolId: number, tokenDecimals: number) {
       totalStaked,
       isActive: exists,
       minStake,
+      rewardPerSec, // Include rewardPerSec for total calculation
       apr,
       tvl,
       minMax: `${minStakeFormatted}/∞`,

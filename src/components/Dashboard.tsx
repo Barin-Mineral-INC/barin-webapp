@@ -12,16 +12,16 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen transition-colors" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-foreground)' }}>
       <Header />
-      <div className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column */}
-          <div className="space-y-8">
+      <div className="container mx-auto px-2 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-10 gap-4">
+          {/* Left Column - 70% */}
+          <div className="lg:col-span-7 space-y-8">
             <PoolInfo />
             <RewardChart />
           </div>
           
-          {/* Right Column */}
-          <div className="space-y-8">
+          {/* Right Column - 30% */}
+          <div className="lg:col-span-3 space-y-8">
             <StakeSection />
             <UserInfo />
             <VotingPower />
