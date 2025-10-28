@@ -37,12 +37,25 @@ export default function RewardChart() {
       };
     }
 
-    // Calculate total staked across all pools
-    const totalStakedBigInt = pools.reduce((sum, pool) => sum + pool.totalStaked, BigInt(0));
+    // Filter pools to only show active ones (current time < end time)
+    const activePools = pools.filter(pool => {
+      const currentTimestamp = BigInt(Math.floor(Date.now() / 1000));
+      return pool.endTimeTimestamp > currentTimestamp;
+    });
+
+    if (activePools.length === 0) {
+      return {
+        segments: [],
+        totalStaked: '0.00',
+      };
+    }
+
+    // Calculate total staked across all active pools
+    const totalStakedBigInt = activePools.reduce((sum, pool) => sum + pool.totalStaked, BigInt(0));
     const totalStakedNum = Number(totalStakedBigInt) / Math.pow(10, tokenDecimals || 18);
 
-    // Create segments for each pool (including pools with 0 stake)
-    const segments: PoolSegment[] = pools.map((pool, index) => {
+    // Create segments for each active pool (including pools with 0 stake)
+    const segments: PoolSegment[] = activePools.map((pool, index) => {
       const stakedNum = Number(pool.totalStaked) / Math.pow(10, tokenDecimals || 18);
       const percentage = totalStakedNum > 0 ? (stakedNum / totalStakedNum) * 100 : 0;
       

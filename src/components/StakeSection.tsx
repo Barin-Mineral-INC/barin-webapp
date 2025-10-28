@@ -147,7 +147,13 @@ export default function StakeSection() {
   // Get best pool recommendation based on stake amount
   const { bestPoolId } = useBestPool(amount, tokenDecimals);
 
-  const selectedPool = pools.find(pool => pool.pid === selectedPoolId);
+  // Filter pools to only show active ones (current time < end time)
+  const activePools = pools.filter(pool => {
+    const currentTimestamp = BigInt(Math.floor(Date.now() / 1000));
+    return pool.endTimeTimestamp > currentTimestamp;
+  });
+
+  const selectedPool = activePools.find(pool => pool.pid === selectedPoolId);
   const poolMinStake = selectedPool ? selectedPool.minMax.split('/')[0] : minStake;
   const userStakedInPool = selectedPool ? parseFloat(selectedPool.userStaked) : 0;
   
@@ -183,7 +189,7 @@ export default function StakeSection() {
               }}
               disabled={!isConnected}
             >
-              {pools.map((pool) => (
+              {activePools.map((pool) => (
                 <option key={pool.pid} value={pool.pid}>
                   Pool {pool.pid + 1} - Min: {pool.minMax.split('/')[0]} - Staked: {pool.userStaked}
                 </option>

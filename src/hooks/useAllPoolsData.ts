@@ -6,10 +6,10 @@ import { CONTRACTS, STAKING_ABI } from '@/lib/contracts';
 import { PoolInfo } from './useStaking';
 import { config } from '@/lib/wagmi';
 
-export function useAllPoolsData(tokenDecimals: number, userAddress?: string): PoolInfo[] {
+export function useAllPoolsData(tokenDecimals: number, userAddress?: string, refreshTrigger?: number): PoolInfo[] {
   const [pools, setPools] = useState<PoolInfo[]>([]);
 
-  const { data: poolLength } = useReadContract({
+  const { data: poolLength, refetch: refetchPoolLength } = useReadContract({
     address: CONTRACTS.STAKING,
     abi: STAKING_ABI,
     functionName: 'poolCount',
@@ -17,6 +17,9 @@ export function useAllPoolsData(tokenDecimals: number, userAddress?: string): Po
 
   useEffect(() => {
     const fetchAllPools = async () => {
+      // Refetch pool count first to get latest count
+      await refetchPoolLength();
+      
       if (!poolLength || !tokenDecimals) return;
 
       const numPools = Number(poolLength);
@@ -31,7 +34,7 @@ export function useAllPoolsData(tokenDecimals: number, userAddress?: string): Po
     };
 
     fetchAllPools();
-  }, [poolLength, tokenDecimals, userAddress]);
+  }, [poolLength, tokenDecimals, userAddress, refreshTrigger, refetchPoolLength]);
 
   return pools;
 }
@@ -137,6 +140,7 @@ async function fetchPoolData(
       minMax: `${minStakeFormatted}/∞`,
       endDate,
       endTime: endTimeStr,
+      endTimeTimestamp: endTime, // Store raw timestamp for filtering
       userStaked: userStakedFormatted,
     };
   } catch (error) {

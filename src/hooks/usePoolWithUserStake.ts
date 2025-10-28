@@ -91,6 +91,7 @@ export function usePoolWithUserStake(poolId: number, tokenDecimals: number, user
       minMax: `${minStakeFormatted}/∞`,
       endDate,
       endTime: endTimeStr,
+      endTimeTimestamp: endTime, // Store raw timestamp for filtering
       userStaked: userStakedFormatted,
     };
   }, [poolData, userStakeData, poolId, tokenDecimals, userAddress]);

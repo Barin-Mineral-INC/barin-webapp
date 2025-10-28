@@ -20,6 +20,7 @@ export interface PoolInfo {
   minMax: string;
   endDate: string;
   endTime: string;
+  endTimeTimestamp: bigint; // Raw timestamp for filtering
   userStaked: string; // User's staked amount in this pool
   // Legacy fields for backward compatibility
   emission?: string;
@@ -27,7 +28,7 @@ export interface PoolInfo {
   healthColor?: string;
 }
 
-export function useStaking() {
+export function useStaking(refreshTrigger?: number) {
   const { address } = useAccount();
   const { writeContract } = useWriteContract();
 
@@ -70,7 +71,7 @@ export function useStaking() {
   // These functions don't exist in the official ABI
 
   // Pool data fetching
-  const pools = useAllPoolsData(tokenDecimals || 18, address);
+  const pools = useAllPoolsData(tokenDecimals || 18, address, refreshTrigger);
 
   // Calculate total reward rate per second from all active pools (considering decimals)
   const totalRewardRatePerSecond = useMemo(() => {

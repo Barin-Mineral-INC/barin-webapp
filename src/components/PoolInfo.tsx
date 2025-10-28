@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Card, { CardHeader, CardTitle, CardAction, CardContent } from "./ui/Card";
 import MetricCard from "./ui/MetricCard";
 import { useStaking } from "@/hooks/useStaking";
@@ -8,9 +9,12 @@ import { useBestPool } from "@/hooks/useBestPool";
 import { useStakeAmount } from "@/stores";
 import { useAccount, useReadContract } from "wagmi";
 import { CONTRACTS, STAKING_ABI } from "@/lib/contracts";
+import AddPoolModal from "./AddPoolModal";
 
 export default function PoolInfo() {
   const { address, isConnected } = useAccount();
+  const [isAddPoolModalOpen, setIsAddPoolModalOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   
   const {
     pools,
@@ -27,10 +31,21 @@ export default function PoolInfo() {
     tokenSymbol,
     tokenDecimals,
     userStake
-  } = useStaking();
+  } = useStaking(refreshTrigger);
+
+  // Function to refresh pool data
+  const handleRefreshPools = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   const amount = useStakeAmount();
   const { bestPoolId } = useBestPool(amount, tokenDecimals);
+
+  // Filter pools to only show active ones (current time < end time)
+  const activePools = pools.filter(pool => {
+    const currentTimestamp = BigInt(Math.floor(Date.now() / 1000));
+    return pool.endTimeTimestamp > currentTimestamp;
+  });
 
   // Fetch ADMIN_ROLE constant
   const { data: adminRole } = useReadContract({
@@ -56,35 +71,37 @@ export default function PoolInfo() {
   ];
 
   return (
-    <Card className="min-h-[700px]">
-      <CardHeader className="pb-8">
-        <CardTitle className="text-3xl">Pool / Protocol Information</CardTitle>
-        <CardAction>
-          <button 
-            hidden={!isAdmin}
-            disabled={!isAdmin}
-            className="font-semibold px-6 py-3 rounded-lg transition-all text-black text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              background: `linear-gradient(135deg, #ffd700, #ffb347)`,
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            }}
-            onMouseEnter={(e) => {
-              if (!e.currentTarget.disabled) {
-                e.currentTarget.style.background = `linear-gradient(135deg, #ffed4e, #ffa726)`;
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!e.currentTarget.disabled) {
-                e.currentTarget.style.background = `linear-gradient(135deg, #ffd700, #ffb347)`;
-                e.currentTarget.style.transform = 'translateY(0)';
-              }
-            }}
-          >
-            Add Pool
-          </button>
-        </CardAction>
-      </CardHeader>
+    <>
+      <Card className="min-h-[700px]">
+        <CardHeader className="pb-8">
+          <CardTitle className="text-3xl">Pool / Protocol Information</CardTitle>
+          <CardAction>
+            <button 
+              hidden={!isAdmin}
+              disabled={!isAdmin}
+              onClick={() => setIsAddPoolModalOpen(true)}
+              className="font-semibold px-6 py-3 rounded-lg transition-all text-black text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                background: `linear-gradient(135deg, #ffd700, #ffb347)`,
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              }}
+              onMouseEnter={(e) => {
+                if (!e.currentTarget.disabled) {
+                  e.currentTarget.style.background = `linear-gradient(135deg, #ffed4e, #ffa726)`;
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!e.currentTarget.disabled) {
+                  e.currentTarget.style.background = `linear-gradient(135deg, #ffd700, #ffb347)`;
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }
+              }}
+            >
+              Add Pool
+            </button>
+          </CardAction>
+        </CardHeader>
       
       <CardContent className="space-y-10 px-2 py-4">
         {/* Metrics Cards */}
@@ -151,8 +168,8 @@ export default function PoolInfo() {
                 </tr>
               </thead>
               <tbody>
-                {pools.length > 0 ? (
-                  pools.map((pool, index) => (
+                {activePools.length > 0 ? (
+                  activePools.map((pool, index) => (
                     <tr 
                       key={pool.pid} 
                       className="border-t"
@@ -209,11 +226,11 @@ export default function PoolInfo() {
                 ) : (
                     <tr className="border-t" style={{ borderColor: '#404040' }}>
                       <td 
-                        colSpan={7}
+                        colSpan={8}
                         className="px-6 py-8 text-center text-base"
                         style={{ color: '#888888' }}
                       >
-                        No pools available
+                        No active pools available
                       </td>
                     </tr>
                 )}
@@ -223,5 +240,13 @@ export default function PoolInfo() {
         </div>
       </CardContent>
     </Card>
+    
+    {/* Add Pool Modal */}
+    <AddPoolModal 
+      isOpen={isAddPoolModalOpen} 
+      onClose={() => setIsAddPoolModalOpen(false)}
+      onSuccess={handleRefreshPools}
+    />
+    </>
   );
 }
