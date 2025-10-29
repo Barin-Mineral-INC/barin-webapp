@@ -106,10 +106,11 @@ export default function RewardChart() {
 
   return (
     <Card>
-      <CardTitle>Total Staked Distribution Chart</CardTitle>
+      <CardTitle className="lg:block hidden">Total Staked Distribution Chart</CardTitle>
       
       <CardContent>
-        <div className="flex items-center justify-center">
+        {/* Desktop Layout */}
+        <div className="hidden lg:flex items-center justify-center">
           <div className="relative w-80 h-80">
             {/* Donut Chart */}
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
@@ -155,6 +156,85 @@ export default function RewardChart() {
             ) : (
               <div className="text-gray-400">No staked pools yet</div>
             )}
+          </div>
+        </div>
+
+        {/* Mobile Layout */}
+        <div className="lg:hidden">
+          <div className="flex flex-col items-center">
+            <div className="relative w-64 h-64">
+              {/* Donut Chart */}
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                {/* Background circle */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="35"
+                  fill="none"
+                  stroke="#1a1a1a"
+                  strokeWidth="20"
+                />
+                
+                {/* Dynamic pool segments */}
+                {renderSegments()}
+              </svg>
+              
+              {/* Center text */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <div className="text-2xl font-bold text-white">+{chartData.totalStaked}</div>
+                <div className="text-xs text-gray-400 mt-1">Tokens</div>
+                <div className="text-xs text-gray-500">Total Rewards</div>
+              </div>
+            </div>
+            
+            {/* Legend - Mobile */}
+            <div className="mt-6 space-y-2 w-full">
+              {chartData.segments.length > 0 ? (
+                chartData.segments.map((segment) => (
+                  <div key={segment.poolId} className="flex items-center space-x-3">
+                    <div 
+                      className="w-8 h-4 rounded" 
+                      style={{ backgroundColor: segment.color }}
+                    ></div>
+                    <div className="flex-1">
+                      <span className="text-white font-medium text-sm">
+                        {segment.poolId % 2 === 0 ? 'Flexible Pool' : `Locked Pool`}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div className="flex items-center space-x-3">
+                    <div 
+                      className="w-8 h-4 rounded" 
+                      style={{ backgroundColor: '#000000' }}
+                    ></div>
+                    <div className="flex-1">
+                      <span className="text-white font-medium text-sm">Flexible Pool</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div 
+                      className="w-8 h-4 rounded" 
+                      style={{ backgroundColor: '#cd7f32' }}
+                    ></div>
+                    <div className="flex-1">
+                      <span className="text-white font-medium text-sm">Locked Pool</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div 
+                      className="w-8 h-4 rounded" 
+                      style={{ backgroundColor: '#ffd700' }}
+                    ></div>
+                    <div className="flex-1">
+                      <span className="text-white font-medium text-sm">Unclaimed</span>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </CardContent>

@@ -9,17 +9,17 @@ interface MetricCardProps {
 export default function MetricCard({ label, value, className = "" }: MetricCardProps) {
   return (
     <div 
-      className={`p-6 rounded-lg transition-colors ${className}`}
+      className={`p-4 lg:p-6 rounded-lg transition-colors ${className}`}
       style={{ backgroundColor: '#1f1f1f' }}
     >
       <div 
-        className="text-base mb-2"
-        style={{ color: '#ffffff' }}
+        className="text-xs lg:text-base mb-1 lg:mb-2"
+        style={{ color: '#cccccc' }}
       >
         {label}
       </div>
       <div 
-        className="text-2xl font-bold"
+        className="text-lg lg:text-2xl font-bold"
         style={{ color: '#ffffff' }}
       >
         {value}

@@ -43,7 +43,7 @@ interface CardHeaderProps {
 
 export function CardHeader({ children, className = "" }: CardHeaderProps) {
   return (
-    <div className={`flex items-center justify-between ${className}`}>
+    <div className={`flex items-center justify-between p-4 lg:p-6 border-b ${className}`} style={{ borderColor: 'var(--color-border)' }}>
       {children}
     </div>
   );
@@ -57,7 +57,7 @@ interface CardTitleProps {
 export function CardTitle({ children, className = "" }: CardTitleProps) {
   return (
     <h2 
-      className={`text-2xl font-bold ${className}`}
+      className={`text-xl lg:text-2xl font-bold ${className}`}
       style={{ color: 'var(--color-foreground)' }}
     >
       {children}
@@ -72,7 +72,7 @@ interface CardContentProps {
 
 export function CardContent({ children, className = "" }: CardContentProps) {
   return (
-    <div className={`p-6 ${className}`}>
+    <div className={`p-4 lg:p-6 ${className}`}>
       {children}
     </div>
   );

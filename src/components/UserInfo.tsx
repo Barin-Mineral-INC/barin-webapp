@@ -98,35 +98,65 @@ export default function UserInfo() {
       <CardContent className="space-y-6">
         {/* Wallet Overview */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold" style={{ color: 'var(--color-foreground)' }}>Wallet Overview</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <MetricCard 
-              label="Total Staked Amount" 
-              value={`${totalStaked} ${tokenSymbol}`}
-            />
+          <h3 className="text-base lg:text-lg font-semibold" style={{ color: 'var(--color-foreground)' }}>Wallet Overview</h3>
+          <div className="grid grid-cols-1 gap-3">
             <MetricCard 
               label="Available Balance" 
-              value={`${parseFloat(tokenBalance).toFixed(2)} ${tokenSymbol}`} 
+              value={`${parseFloat(tokenBalance).toFixed(2)}`} 
+            />
+            <MetricCard 
+              label="Rewards Pending" 
+              value={`${totalPendingRewards}`}
             />
           </div>
-          <MetricCard 
-            label="Rewards Pending" 
-            value={`${totalPendingRewards} ${tokenSymbol}`}
-          />
         </div>
 
-        {/* Address */}
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold" style={{ color: 'var(--color-foreground)' }}>Wallet Address</h3>
+        {/* Per-pool Details (Mobile) */}
+        <div className="space-y-3 lg:hidden">
+          <h3 className="text-base font-semibold" style={{ color: 'var(--color-foreground)' }}>Per-pool Details</h3>
+          {pools.slice(0, 2).map((pool, index) => (
+            <div 
+              key={pool.pid}
+              className="p-3 rounded-lg"
+              style={{ 
+                backgroundColor: '#2a2a2a',
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-white">
+                  {pool.pid % 2 === 0 ? 'Flexible Pool' : 'Locked Pool'}
+                </span>
+                <span className="text-sm font-semibold" style={{ color: pool.pid % 2 === 0 ? '#00ff88' : '#ffd700' }}>
+                  {pool.pid % 2 === 0 ? 'APR: 15%' : 'APY: 25%'}
+                </span>
+              </div>
+              {pool.pid % 2 !== 0 && (
+                <div className="text-xs mt-1" style={{ color: '#ff4444' }}>
+                  Penalty: -10% if unstaked early
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Voting Power (Mobile) */}
+        <div className="space-y-3 lg:hidden">
+          <h3 className="text-base font-semibold" style={{ color: 'var(--color-foreground)' }}>Voting Power</h3>
           <div 
-            className="p-3 rounded-lg font-mono text-sm"
-            style={{ 
-              backgroundColor: 'var(--color-card)', 
-              color: 'var(--color-muted)' 
-            }}
+            className="p-4 rounded-lg text-center"
+            style={{ backgroundColor: '#2a2a2a' }}
           >
-            {address}
+            <div className="text-xs mb-2" style={{ color: 'var(--color-muted)' }}>Total Voting Power</div>
+            <div className="text-2xl font-bold" style={{ color: 'var(--color-foreground)' }}>1,500 VP</div>
           </div>
+        </div>
+
+        {/* Desktop - Total Staked */}
+        <div className="hidden lg:block">
+          <MetricCard 
+            label="Total Staked Amount" 
+            value={`${totalStaked} ${tokenSymbol}`}
+          />
         </div>
 
         {/* Staking Details */}
@@ -166,13 +196,6 @@ export default function UserInfo() {
                 </div>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* No staking info */}
-        {true && ( // Always show since userStake is not available
-          <div className="text-center py-4" style={{ color: 'var(--color-muted)' }}>
-            You haven&apos;t staked any tokens yet. Start staking to earn rewards!
           </div>
         )}
       </CardContent>

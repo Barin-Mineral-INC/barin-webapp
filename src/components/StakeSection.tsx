@@ -163,17 +163,16 @@ export default function StakeSection() {
 
   return (
     <Card>
-      <CardTitle>Stake {tokenSymbol}</CardTitle>
+      <CardTitle className="text-xl lg:text-2xl">Stake Tokens</CardTitle>
       
       <CardContent>
         <div className="space-y-4">
-          {/* Balance info */}
+          {/* Balance info - Hidden on Mobile */}
           <div className="flex justify-between text-sm" style={{ color: 'var(--color-muted)' }}>
             <span>Balance: {tokenBalance} {tokenSymbol}</span>
             <span>Staked: {userStakedInPool} {tokenSymbol}</span>
           </div>
           
-          {/* Pool selector */}
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-foreground)' }}>
               Select Pool
@@ -203,7 +202,7 @@ export default function StakeSection() {
               type="number"
               min="0"
               step="any"
-              placeholder={`Enter amount to stake (min: ${poolMinStake})`}
+              placeholder="Enter amount to stake"
               value={amount}
               onChange={(e) => {
                 const value = e.target.value;
@@ -212,7 +211,7 @@ export default function StakeSection() {
                   setAmount(value);
                 }
               }}
-              className="w-full rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-yellow-400"
               style={{
                 backgroundColor: '#333333',
                 border: '1px solid #404040',
@@ -222,7 +221,6 @@ export default function StakeSection() {
             />
           </div>
 
-          {/* Max button */}
           <button
             onClick={() => setAmount(tokenBalance)}
             className="text-sm px-3 py-1 rounded border"
@@ -241,7 +239,7 @@ export default function StakeSection() {
             <button 
               onClick={handleStake}
               disabled={!canStake || isStaking || !isConnected}
-              className="w-full font-bold py-3 rounded-lg text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full font-semibold lg:font-bold py-3 lg:py-3 text-base lg:text-base rounded-lg text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 background: `linear-gradient(135deg, #ffd700, #ffb347)`,
                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
@@ -267,7 +265,7 @@ export default function StakeSection() {
             <button 
               onClick={handleUnstake}
               disabled={!canUnstake || isStaking || !isConnected}
-              className="w-full font-bold py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="lg:flex w-full font-bold py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed items-center justify-center"
               style={{
                 backgroundColor: 'transparent',
                 border: '2px solid #ff4444',
