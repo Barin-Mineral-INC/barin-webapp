@@ -208,8 +208,8 @@ export default function AddPoolModal({ isOpen, onClose, onSuccess }: AddPoolModa
               onChange={(e) => handleInputChange('rewardPerSec', e.target.value)}
               className="w-full rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"
               style={{
-                backgroundColor: '#333333',
-                border: '1px solid #404040',
+                backgroundColor: 'var(--color-card)',
+                border: '1px solid var(--color-border)',
                 color: 'var(--color-foreground)',
               }}
               disabled={isLoading}
@@ -240,8 +240,8 @@ export default function AddPoolModal({ isOpen, onClose, onSuccess }: AddPoolModa
               onChange={(e) => handleInputChange('minStake', e.target.value)}
               className="w-full rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"
               style={{
-                backgroundColor: '#333333',
-                border: '1px solid #404040',
+                backgroundColor: 'var(--color-card)',
+                border: '1px solid var(--color-border)',
                 color: 'var(--color-foreground)',
               }}
               disabled={isLoading}
@@ -270,8 +270,8 @@ export default function AddPoolModal({ isOpen, onClose, onSuccess }: AddPoolModa
               onChange={(e) => handleInputChange('endTime', e.target.value)}
               className="w-full rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"
               style={{
-                backgroundColor: '#333333',
-                border: '1px solid #404040',
+                backgroundColor: 'var(--color-card)',
+                border: '1px solid var(--color-border)',
                 color: 'var(--color-foreground)',
               }}
               disabled={isLoading}

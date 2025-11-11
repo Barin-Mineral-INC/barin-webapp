@@ -120,7 +120,7 @@ export default function RewardChart() {
                 cy="50"
                 r="35"
                 fill="none"
-                stroke="#1a1a1a"
+                stroke="var(--color-card)"
                 strokeWidth="20"
               />
               
@@ -130,9 +130,9 @@ export default function RewardChart() {
             
             {/* Center text */}
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="text-4xl font-bold text-white">{chartData.totalStaked}</div>
-              <div className="text-sm text-gray-400 mt-1">Tokens</div>
-              <div className="text-xs text-gray-500 mt-1">Total Staked</div>
+              <div className="text-4xl font-bold" style={{ color: 'var(--color-foreground)' }}>{chartData.totalStaked}</div>
+              <div className="text-sm mt-1" style={{ color: 'var(--color-muted)' }}>Tokens</div>
+              <div className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Total Staked</div>
             </div>
           </div>
           
@@ -146,15 +146,15 @@ export default function RewardChart() {
                     style={{ backgroundColor: segment.color }}
                   ></div>
                   <div className="flex flex-col">
-                    <span className="text-white font-medium">{segment.poolName}</span>
-                    <span className="text-gray-400 text-sm">
+                    <span className="font-medium" style={{ color: 'var(--color-foreground)' }}>{segment.poolName}</span>
+                    <span className="text-sm" style={{ color: 'var(--color-muted)' }}>
                       {segment.totalStaked} ({segment.percentage.toFixed(1)}%)
                     </span>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-gray-400">No staked pools yet</div>
+              <div style={{ color: 'var(--color-muted)' }}>No staked pools yet</div>
             )}
           </div>
         </div>
@@ -171,7 +171,7 @@ export default function RewardChart() {
                   cy="50"
                   r="35"
                   fill="none"
-                  stroke="#1a1a1a"
+                  stroke="var(--color-card)"
                   strokeWidth="20"
                 />
                 
@@ -181,9 +181,9 @@ export default function RewardChart() {
               
               {/* Center text */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-2xl font-bold text-white">+{chartData.totalStaked}</div>
-                <div className="text-xs text-gray-400 mt-1">Tokens</div>
-                <div className="text-xs text-gray-500">Total Rewards</div>
+                <div className="text-2xl font-bold" style={{ color: 'var(--color-foreground)' }}>+{chartData.totalStaked}</div>
+                <div className="text-xs mt-1" style={{ color: 'var(--color-muted)' }}>Tokens</div>
+                <div className="text-xs" style={{ color: 'var(--color-muted)' }}>Total Rewards</div>
               </div>
             </div>
             
@@ -197,7 +197,7 @@ export default function RewardChart() {
                       style={{ backgroundColor: segment.color }}
                     ></div>
                     <div className="flex-1">
-                      <span className="text-white font-medium text-sm">
+                      <span className="font-medium text-sm" style={{ color: 'var(--color-foreground)' }}>
                         {segment.poolId % 2 === 0 ? 'Flexible Pool' : `Locked Pool`}
                       </span>
                     </div>
@@ -211,7 +211,7 @@ export default function RewardChart() {
                       style={{ backgroundColor: '#000000' }}
                     ></div>
                     <div className="flex-1">
-                      <span className="text-white font-medium text-sm">Flexible Pool</span>
+                      <span className="font-medium text-sm" style={{ color: 'var(--color-foreground)' }}>Flexible Pool</span>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
@@ -220,7 +220,7 @@ export default function RewardChart() {
                       style={{ backgroundColor: '#cd7f32' }}
                     ></div>
                     <div className="flex-1">
-                      <span className="text-white font-medium text-sm">Locked Pool</span>
+                      <span className="font-medium text-sm" style={{ color: 'var(--color-foreground)' }}>Locked Pool</span>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
@@ -229,7 +229,7 @@ export default function RewardChart() {
                       style={{ backgroundColor: '#ffd700' }}
                     ></div>
                     <div className="flex-1">
-                      <span className="text-white font-medium text-sm">Unclaimed</span>
+                      <span className="font-medium text-sm" style={{ color: 'var(--color-foreground)' }}>Unclaimed</span>
                     </div>
                   </div>
                 </>

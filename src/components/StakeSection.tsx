@@ -254,8 +254,8 @@ export default function StakeSection() {
               onChange={(e) => setSelectedPoolId(Number(e.target.value))}
               className="w-full rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"
               style={{
-                backgroundColor: '#333333',
-                border: '1px solid #404040',
+                backgroundColor: 'var(--color-card)',
+                border: '1px solid var(--color-border)',
                 color: 'var(--color-foreground)',
               }}
               disabled={!isConnected}
@@ -285,8 +285,8 @@ export default function StakeSection() {
               }}
               className="w-full rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-yellow-400"
               style={{
-                backgroundColor: '#333333',
-                border: '1px solid #404040',
+                backgroundColor: 'var(--color-card)',
+                border: '1px solid var(--color-border)',
                 color: 'var(--color-foreground)',
               }}
               disabled={!isConnected}

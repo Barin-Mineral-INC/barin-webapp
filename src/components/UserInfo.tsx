@@ -119,11 +119,11 @@ export default function UserInfo() {
               key={pool.pid}
               className="p-3 rounded-lg"
               style={{ 
-                backgroundColor: '#2a2a2a',
+                backgroundColor: 'var(--color-card)',
               }}
             >
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-white">
+                <span className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>
                   {pool.pid % 2 === 0 ? 'Flexible Pool' : 'Locked Pool'}
                 </span>
                 <span className="text-sm font-semibold" style={{ color: pool.pid % 2 === 0 ? '#00ff88' : '#ffd700' }}>
@@ -144,7 +144,7 @@ export default function UserInfo() {
           <h3 className="text-base font-semibold" style={{ color: 'var(--color-foreground)' }}>Voting Power</h3>
           <div 
             className="p-4 rounded-lg text-center"
-            style={{ backgroundColor: '#2a2a2a' }}
+            style={{ backgroundColor: 'var(--color-card)' }}
           >
             <div className="text-xs mb-2" style={{ color: 'var(--color-muted)' }}>Total Voting Power</div>
             <div className="text-2xl font-bold" style={{ color: 'var(--color-foreground)' }}>1,500 VP</div>

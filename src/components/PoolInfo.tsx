@@ -122,53 +122,53 @@ export default function PoolInfo() {
         {/* Pool Table - Desktop */}
         <div className="rounded-lg hidden lg:block overflow-x-auto">
           <table className="w-full">
-            <thead style={{ backgroundColor: '#1a1a1a' }}>
+            <thead style={{ backgroundColor: 'var(--color-card)' }}>
               <tr>
                 <th 
                   className="px-4 py-5 text-center text-base font-medium"
-                  style={{ color: '#ffffff', width: '8%' }}
+                  style={{ color: 'var(--color-foreground)', width: '8%' }}
                 >
                   Pool
                 </th>
                 <th 
                   className="px-4 py-5 text-center text-base font-medium"
-                  style={{ color: '#ffffff', width: '8%' }}
+                  style={{ color: 'var(--color-foreground)', width: '8%' }}
                 >
                   APR
                 </th>
                 <th 
                   className="px-4 py-5 text-center text-base font-medium"
-                  style={{ color: '#ffffff', width: '18%' }}
+                  style={{ color: 'var(--color-foreground)', width: '18%' }}
                 >
                   Total Staked
                 </th>
                 <th 
                   className="px-4 py-5 text-center text-base font-medium"
-                  style={{ color: '#ffffff', width: '18%' }}
+                  style={{ color: 'var(--color-foreground)', width: '18%' }}
                 >
                   Reward Rate
                 </th>
                 <th 
                   className="px-4 py-5 text-center text-base font-medium"
-                  style={{ color: '#ffffff', width: '15%' }}
+                  style={{ color: 'var(--color-foreground)', width: '15%' }}
                 >
                   Min/Max
                 </th>
                 <th 
                   className="px-4 py-5 text-center text-base font-medium"
-                  style={{ color: '#ffffff', width: '20%' }}
+                  style={{ color: 'var(--color-foreground)', width: '20%' }}
                 >
                   End Date (UTC)
                 </th>
                 <th 
                   className="px-4 py-5 text-center text-base font-medium"
-                  style={{ color: '#ffffff', width: '15%' }}
+                  style={{ color: 'var(--color-foreground)', width: '15%' }}
                 >
                   End Time (UTC)
                 </th>
                 <th 
                   className="px-4 py-5 text-center text-base font-medium"
-                  style={{ color: '#ffffff', width: '12%' }}
+                  style={{ color: 'var(--color-foreground)', width: '12%' }}
                 >
                   Your Staked
                 </th>
@@ -180,10 +180,10 @@ export default function PoolInfo() {
                   <tr 
                     key={pool.pid} 
                     className="border-t"
-                    style={{ borderColor: '#404040' }}
+                    style={{ borderColor: 'var(--color-border)' }}
                   >
                     <td className="px-4 py-5 text-center">
-                      <span className="text-base font-semibold" style={{ color: '#ffffff' }}>
+                      <span className="text-base font-semibold" style={{ color: 'var(--color-foreground)' }}>
                         Pool {pool.pid + 1}
                       </span>
                     </td>
@@ -194,48 +194,48 @@ export default function PoolInfo() {
                     </td>
                     <td 
                       className="px-4 py-5 text-base text-right"
-                      style={{ color: '#ffffff' }}
+                      style={{ color: 'var(--color-foreground)' }}
                     >
                       {pool.tvl}
                     </td>
                     <td 
                       className="px-4 py-5 text-base text-right"
-                      style={{ color: '#ffffff' }}
+                      style={{ color: 'var(--color-foreground)' }}
                     >
                       {formatUnits(pool.rewardPerSec, tokenDecimals || 18)}/sec
                     </td>
                     <td 
                       className="px-4 py-5 text-base text-right"
-                      style={{ color: '#ffffff' }}
+                      style={{ color: 'var(--color-foreground)' }}
                     >
                       {pool.minMax}
                     </td>
                     <td 
                       className="px-4 py-5 text-base text-right"
-                      style={{ color: '#ffffff' }}
+                      style={{ color: 'var(--color-foreground)' }}
                     >
                       {pool.endDate}
                     </td>
                     <td 
                       className="px-4 py-5 text-base text-right"
-                      style={{ color: '#ffffff' }}
+                      style={{ color: 'var(--color-foreground)' }}
                     >
                       {pool.endTime}
                     </td>
                     <td 
                       className="px-4 py-5 text-base text-right"
-                      style={{ color: '#ffffff' }}
+                      style={{ color: 'var(--color-foreground)' }}
                     >
                       {pool.userStaked}
                     </td>
                   </tr>
                 ))
               ) : (
-                  <tr className="border-t" style={{ borderColor: '#404040' }}>
+                  <tr className="border-t" style={{ borderColor: 'var(--color-border)' }}>
                     <td 
                       colSpan={8}
                       className="px-6 py-8 text-center text-base"
-                      style={{ color: '#888888' }}
+                      style={{ color: 'var(--color-muted)' }}
                     >
                       No active pools available
                     </td>
@@ -248,35 +248,35 @@ export default function PoolInfo() {
         {/* Pool Table - Mobile (Simplified) */}
         <div className="rounded-lg lg:hidden overflow-x-auto">
           <table className="w-full text-sm">
-            <thead style={{ backgroundColor: '#1a1a1a' }}>
+            <thead style={{ backgroundColor: 'var(--color-card)' }}>
               <tr>
                 <th 
                   className="px-2 py-3 text-left text-xs font-medium"
-                  style={{ color: '#ffffff' }}
+                  style={{ color: 'var(--color-foreground)' }}
                 >
                   Pool Type
                 </th>
                 <th 
                   className="px-2 py-3 text-center text-xs font-medium"
-                  style={{ color: '#ffffff' }}
+                  style={{ color: 'var(--color-foreground)' }}
                 >
                   APR
                 </th>
                 <th 
                   className="px-2 py-3 text-center text-xs font-medium"
-                  style={{ color: '#ffffff' }}
+                  style={{ color: 'var(--color-foreground)' }}
                 >
                   TVL
                 </th>
                 <th 
                   className="px-2 py-3 text-center text-xs font-medium"
-                  style={{ color: '#ffffff' }}
+                  style={{ color: 'var(--color-foreground)' }}
                 >
                   Min/Max
                 </th>
                 <th 
                   className="px-2 py-3 text-center text-xs font-medium"
-                  style={{ color: '#ffffff' }}
+                  style={{ color: 'var(--color-foreground)' }}
                 >
                   End Date
                 </th>
@@ -288,10 +288,10 @@ export default function PoolInfo() {
                   <tr 
                     key={pool.pid} 
                     className="border-t"
-                    style={{ borderColor: '#404040' }}
+                    style={{ borderColor: 'var(--color-border)' }}
                   >
                     <td className="px-2 py-3 text-left">
-                      <span className="text-xs font-semibold" style={{ color: '#ffffff' }}>
+                      <span className="text-xs font-semibold" style={{ color: 'var(--color-foreground)' }}>
                         Pool {pool.pid + 1}
                       </span>
                     </td>
@@ -302,30 +302,30 @@ export default function PoolInfo() {
                     </td>
                     <td 
                       className="px-2 py-3 text-xs text-center"
-                      style={{ color: '#ffffff' }}
+                      style={{ color: 'var(--color-foreground)' }}
                     >
                       {pool.tvl}
                     </td>
                     <td 
                       className="px-2 py-3 text-xs text-center"
-                      style={{ color: '#ffffff' }}
+                      style={{ color: 'var(--color-foreground)' }}
                     >
                       {pool.minMax}
                     </td>
                     <td 
                       className="px-2 py-3 text-xs text-center"
-                      style={{ color: '#ffffff' }}
+                      style={{ color: 'var(--color-foreground)' }}
                     >
                       {pool.endDate}
                     </td>
                   </tr>
                 ))
               ) : (
-                  <tr className="border-t" style={{ borderColor: '#404040' }}>
+                  <tr className="border-t" style={{ borderColor: 'var(--color-border)' }}>
                     <td 
                       colSpan={5}
                       className="px-4 py-6 text-center text-xs"
-                      style={{ color: '#888888' }}
+                      style={{ color: 'var(--color-muted)' }}
                     >
                       No active pools available
                     </td>
