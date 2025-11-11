@@ -5,7 +5,6 @@ import PoolInfo from "./PoolInfo";
 import RewardChart from "./RewardChart";
 import StakeSection from "./StakeSection";
 import UserInfo from "./UserInfo";
-import VotingPower from "./VotingPower";
 import NotificationContainer from "./NotificationContainer";
 
 export default function Dashboard() {
@@ -34,7 +33,6 @@ export default function Dashboard() {
           <div className="lg:col-span-3 space-y-8">
             <StakeSection />
             <UserInfo />
-            <VotingPower />
           </div>
         </div>
       </div>

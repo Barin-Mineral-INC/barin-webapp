@@ -47,6 +47,16 @@ export default function PoolInfo() {
     return pool.endTimeTimestamp > currentTimestamp;
   });
 
+  // Calculate metrics from active pools only
+  const activePoolsCount = activePools.length;
+  const activeTotalStaked = activePools.reduce((sum, pool) => {
+    return sum + Number(pool.tvl);
+  }, 0);
+  const activeTotalRewardRate = activePools.reduce((sum, pool) => {
+    return sum + pool.rewardPerSec;
+  }, BigInt(0));
+  const formattedActiveTotalRewardRate = formatUnits(activeTotalRewardRate, tokenDecimals || 18);
+
   // Fetch ADMIN_ROLE constant
   const { data: adminRole } = useReadContract({
     address: CONTRACTS.STAKING,
@@ -65,9 +75,9 @@ export default function PoolInfo() {
   const isAdmin = isConnected && hasAdminRole === true;
 
   const metrics = [
-    { label: "Total Pools", value: poolLength.toString() },
-    { label: "Total Staked", value: totalStaked },
-    { label: "Reward Rate", value: `${totalRewardRatePerSecond}/sec` },
+    { label: "Total Pools", value: activePoolsCount.toString() },
+    { label: "Total Staked", value: activeTotalStaked.toString() },
+    { label: "Reward Rate", value: `${formattedActiveTotalRewardRate}/sec` },
   ];
 
   return (
