@@ -1,4 +1,4 @@
-import { useReadContract, useWriteContract } from 'wagmi';
+import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { formatUnits, parseUnits } from 'viem';
 import { CONTRACTS, STAKING_ABI, ERC20_ABI } from '@/lib/contracts';
 import { useAccount } from 'wagmi';
@@ -61,6 +61,14 @@ export function useStaking(refreshTrigger?: number) {
     functionName: 'symbol',
   });
 
+  // Check allowance for staking contract
+  const { data: allowance, refetch: refetchAllowance } = useReadContract({
+    address: CONTRACTS.BARIN_TOKEN,
+    abi: ERC20_ABI,
+    functionName: 'allowance',
+    args: address ? [address, CONTRACTS.STAKING] : undefined,
+  });
+
   // Legacy functions for backward compatibility
   const { data: totalStaked } = useReadContract({
     address: CONTRACTS.STAKING,
@@ -97,26 +105,42 @@ export function useStaking(refreshTrigger?: number) {
   };
 
   // Write functions
-  const stake = async (pid: number, amount: string) => {
+  const approve = async (amount: string) => {
     if (!address || !tokenDecimals) return;
     
     const amountWei = parseUnits(amount, tokenDecimals);
     
-    // First approve the staking contract to spend tokens
-    writeContract({
+    return writeContract({
       address: CONTRACTS.BARIN_TOKEN,
       abi: ERC20_ABI,
       functionName: 'approve',
       args: [CONTRACTS.STAKING, amountWei],
     });
+  };
 
-    // Then stake
-    writeContract({
+  const stake = async (pid: number, amount: string) => {
+    if (!address || !tokenDecimals) return;
+    
+    const amountWei = parseUnits(amount, tokenDecimals);
+
+    return writeContract({
       address: CONTRACTS.STAKING,
       abi: STAKING_ABI,
       functionName: 'stake',
       args: [BigInt(pid), amountWei],
     });
+  };
+
+  // Check if approval is needed for a given amount
+  const needsApproval = (amount: string): boolean => {
+    if (!tokenDecimals || !allowance) return true;
+    
+    try {
+      const amountWei = parseUnits(amount, tokenDecimals);
+      return allowance < amountWei;
+    } catch {
+      return true;
+    }
   };
 
   const unstake = async (pid: number, amount: string) => {
@@ -206,7 +230,13 @@ export function useStaking(refreshTrigger?: number) {
     tokenSymbol: tokenSymbol || 'BARIN',
     tokenDecimals: tokenDecimals || 18,
     
+    // Allowance data
+    allowance: allowance || BigInt(0),
+    refetchAllowance,
+    needsApproval,
+    
     // Actions
+    approve,
     stake,
     unstake,
     claimRewards,

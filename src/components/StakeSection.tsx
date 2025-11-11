@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Card, { CardTitle, CardContent } from "./ui/Card";
 import { useStaking } from "@/hooks/useStaking";
-import { useAccount } from 'wagmi';
+import { useAccount, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 import { useStakeAmount, useSetStakeAmount, useClearStakeAmount, useAddTransaction, useAppStore } from "@/stores";
+import { CONTRACTS, ERC20_ABI, STAKING_ABI } from "@/lib/contracts";
+import { parseUnits } from "viem";
 
 export default function StakeSection() {
   const [isStaking, setIsStaking] = useState(false);
@@ -17,10 +19,11 @@ export default function StakeSection() {
     tokenDecimals,
     minStake, 
     maxStake,
-    stake,
     unstake,
     claimRewards,
-    userRewards 
+    userRewards,
+    needsApproval,
+    refetchAllowance
   } = useStaking();
 
   // Zustand store
@@ -30,14 +33,85 @@ export default function StakeSection() {
   const addTransaction = useAddTransaction();
   const { addNotification, setLoading } = useAppStore();
 
-  const handleStake = async () => {
-    if (!amount || !isConnected) return;
+  // Approval transaction
+  const { 
+    data: approveTxHash, 
+    writeContract: writeApprove,
+    isPending: isApprovePending 
+  } = useWriteContract();
+
+  // Staking transaction
+  const { 
+    data: stakeTxHash, 
+    writeContract: writeStake,
+    isPending: isStakePending 
+  } = useWriteContract();
+
+  // Wait for approval transaction
+  const { isSuccess: isApprovalSuccess, isLoading: isApprovalLoading } = useWaitForTransactionReceipt({
+    hash: approveTxHash,
+  });
+
+  // When approval is successful, refetch allowance
+  useEffect(() => {
+    if (isApprovalSuccess) {
+      refetchAllowance();
+      setIsStaking(false);
+      setLoading('staking', false);
+      addNotification({
+        type: 'success',
+        title: 'Approval Successful',
+        message: `You can now stake your ${tokenSymbol} tokens`,
+      });
+    }
+  }, [isApprovalSuccess, refetchAllowance, addNotification, tokenSymbol, setLoading]);
+
+  const handleApprove = async () => {
+    if (!amount || !isConnected || !tokenDecimals) return;
     
     setIsStaking(true);
     setLoading('staking', true);
     
     try {
-      await stake(selectedPoolId, amount);
+      const amountWei = parseUnits(amount, tokenDecimals);
+      writeApprove({
+        address: CONTRACTS.BARIN_TOKEN,
+        abi: ERC20_ABI,
+        functionName: 'approve',
+        args: [CONTRACTS.STAKING, amountWei],
+      });
+      
+      addNotification({
+        type: 'info',
+        title: 'Approval Pending',
+        message: `Approving ${tokenSymbol} tokens for staking...`,
+      });
+    } catch (error) {
+      console.error('Approval failed:', error);
+      addNotification({
+        type: 'error',
+        title: 'Approval Failed',
+        message: error instanceof Error ? error.message : 'Unknown error occurred',
+      });
+      setIsStaking(false);
+      setLoading('staking', false);
+    }
+  };
+
+  const handleStake = async () => {
+    if (!amount || !isConnected || !tokenDecimals) return;
+    
+    setIsStaking(true);
+    setLoading('staking', true);
+    
+    try {
+      const amountWei = parseUnits(amount, tokenDecimals);
+      writeStake({
+        address: CONTRACTS.STAKING,
+        abi: STAKING_ABI,
+        functionName: 'stake',
+        args: [BigInt(selectedPoolId), amountWei],
+      });
       
       // Add transaction to store (using a placeholder hash for now)
       const txHash = `stake_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -156,6 +230,8 @@ export default function StakeSection() {
   const isValidAmount = amount && parseFloat(amount) > 0 && parseFloat(amount) <= parseFloat(tokenBalance);
   const canStake = isValidAmount && parseFloat(amount) >= parseFloat(poolMinStake) && parseFloat(amount) <= parseFloat(tokenBalance);
   const canUnstake = isValidAmount && parseFloat(amount) <= userStakedInPool && userStakedInPool > 0;
+  const requiresApproval = amount && needsApproval(amount);
+  const isProcessingApproval = isApprovalLoading || isApprovePending || (approveTxHash !== undefined && !isApprovalSuccess);
 
   return (
     <Card>
@@ -232,31 +308,59 @@ export default function StakeSection() {
           
           {/* Action buttons */}
           <div className="space-y-2">
-            <button 
-              onClick={handleStake}
-              disabled={!canStake || isStaking || !isConnected}
-              className="w-full font-semibold lg:font-bold py-3 lg:py-3 text-base lg:text-base rounded-lg text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{
-                background: `linear-gradient(135deg, #ffd700, #ffb347)`,
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-              }}
-              onMouseEnter={(e) => {
-                if (!e.currentTarget.disabled) {
-                  e.currentTarget.style.background = `linear-gradient(135deg, #ffed4e, #ffa726)`;
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!e.currentTarget.disabled) {
-                  e.currentTarget.style.background = `linear-gradient(135deg, #ffd700, #ffb347)`;
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                }
-              }}
-            >
-              {isStaking ? 'Staking...' : 'Stake'}
-            </button>
+            {requiresApproval ? (
+              <button 
+                onClick={handleApprove}
+                disabled={!isValidAmount || isStaking || !isConnected || isProcessingApproval}
+                className="w-full font-semibold lg:font-bold py-3 lg:py-3 text-base lg:text-base rounded-lg text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: `linear-gradient(135deg, #4a90e2, #357abd)`,
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                }}
+                onMouseEnter={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.background = `linear-gradient(135deg, #5aa0f2, #4589cc)`;
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.background = `linear-gradient(135deg, #4a90e2, #357abd)`;
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                  }
+                }}
+              >
+                {isProcessingApproval ? 'Approving...' : 'Approve'}
+              </button>
+            ) : (
+              <button 
+                onClick={handleStake}
+                disabled={!canStake || isStaking || !isConnected}
+                className="w-full font-semibold lg:font-bold py-3 lg:py-3 text-base lg:text-base rounded-lg text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: `linear-gradient(135deg, #ffd700, #ffb347)`,
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                }}
+                onMouseEnter={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.background = `linear-gradient(135deg, #ffed4e, #ffa726)`;
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.background = `linear-gradient(135deg, #ffd700, #ffb347)`;
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                  }
+                }}
+              >
+                {isStaking ? 'Staking...' : 'Stake'}
+              </button>
+            )}
 
             <button 
               onClick={handleUnstake}
