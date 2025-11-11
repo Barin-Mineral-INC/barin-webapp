@@ -197,7 +197,6 @@ export const useStakingStore = create<StakingState>()(
 export const useTransactions = () => useStakingStore((state) => state.transactions);
 export const useStakingPreferences = () => useStakingStore((state) => state.preferences);
 export const useStakeAmount = () => useStakingStore((state) => state.stakeAmount);
-export const useBestPoolId = () => useStakingStore((state) => state.bestPoolId);
 export const useRecentActivity = () => useStakingStore((state) => state.recentActivity);
 export const useStakingStats = () => useStakingStore((state) => state.stats);
 export const useQuickStakeAmounts = () => useStakingStore((state) => state.quickStakeAmounts);
@@ -205,7 +204,6 @@ export const useQuickStakeAmounts = () => useStakingStore((state) => state.quick
 // Action selectors
 export const useSetStakeAmount = () => useStakingStore((state) => state.setStakeAmount);
 export const useClearStakeAmount = () => useStakingStore((state) => state.clearStakeAmount);
-export const useSetBestPoolId = () => useStakingStore((state) => state.setBestPoolId);
 export const useAddTransaction = () => useStakingStore((state) => state.addTransaction);
 export const useUpdateTransaction = () => useStakingStore((state) => state.updateTransaction);
 export const useRemoveTransaction = () => useStakingStore((state) => state.removeTransaction);

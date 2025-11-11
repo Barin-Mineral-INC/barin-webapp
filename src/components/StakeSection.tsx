@@ -5,7 +5,6 @@ import Card, { CardTitle, CardContent } from "./ui/Card";
 import { useStaking } from "@/hooks/useStaking";
 import { useAccount } from 'wagmi';
 import { useStakeAmount, useSetStakeAmount, useClearStakeAmount, useAddTransaction, useAppStore } from "@/stores";
-import { useBestPool } from "@/hooks/useBestPool";
 
 export default function StakeSection() {
   const [isStaking, setIsStaking] = useState(false);
@@ -143,9 +142,6 @@ export default function StakeSection() {
       setLoading('claiming', false);
     }
   };
-
-  // Get best pool recommendation based on stake amount
-  const { bestPoolId } = useBestPool(amount, tokenDecimals);
 
   // Filter pools to only show active ones (current time < end time)
   const activePools = pools.filter(pool => {

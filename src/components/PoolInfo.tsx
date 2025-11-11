@@ -5,7 +5,6 @@ import Card, { CardHeader, CardTitle, CardAction, CardContent } from "./ui/Card"
 import MetricCard from "./ui/MetricCard";
 import { useStaking } from "@/hooks/useStaking";
 import { formatUnits } from "viem";
-import { useBestPool } from "@/hooks/useBestPool";
 import { useStakeAmount } from "@/stores";
 import { useAccount, useReadContract } from "wagmi";
 import { CONTRACTS, STAKING_ABI } from "@/lib/contracts";
@@ -39,7 +38,6 @@ export default function PoolInfo() {
   };
 
   const amount = useStakeAmount();
-  const { bestPoolId } = useBestPool(amount, tokenDecimals);
 
   // Filter pools to only show active ones (current time < end time)
   const activePools = pools.filter(pool => {
