@@ -7,7 +7,7 @@ export default function Header() {
   const theme = useTheme();
   const chain = useChain();
   const toggleTheme = useThemeStore((state) => state.toggleTheme);
-  const setChain = useThemeStore((state) => state.setChain);
+  const setChain = useThemeStore((state) => state.setChain); 
 
   return (
     <header 
