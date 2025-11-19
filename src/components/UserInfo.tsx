@@ -140,7 +140,7 @@ export default function UserInfo() {
         </div>
 
         {/* Voting Power (Mobile) */}
-        <div className="space-y-3 lg:hidden">
+        <div className="space-y-3 hidden">
           <h3 className="text-base font-semibold" style={{ color: 'var(--color-foreground)' }}>Voting Power</h3>
           <div 
             className="p-4 rounded-lg text-center"
