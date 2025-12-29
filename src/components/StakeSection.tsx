@@ -7,6 +7,7 @@ import { useAccount, useWaitForTransactionReceipt, useWriteContract } from 'wagm
 import { useStakeAmount, useSetStakeAmount, useClearStakeAmount, useAddTransaction, useAppStore } from "@/stores";
 import { CONTRACTS, ERC20_ABI, STAKING_ABI } from "@/lib/contracts";
 import { parseUnits } from "viem";
+import { toFixed2 } from "@/utils/format";
 
 export default function StakeSection() {
   const [isStaking, setIsStaking] = useState(false);
@@ -241,8 +242,8 @@ export default function StakeSection() {
         <div className="space-y-4">
           {/* Balance info - Hidden on Mobile */}
           <div className="flex justify-between text-sm" style={{ color: 'var(--color-muted)' }}>
-            <span>Balance: {tokenBalance} {tokenSymbol}</span>
-            <span>Staked: {userStakedInPool} {tokenSymbol}</span>
+            <span>Balance: {toFixed2(tokenBalance)} {tokenSymbol}</span>
+            <span>Staked: {toFixed2(userStakedInPool)} {tokenSymbol}</span>
           </div>
           
           <div>

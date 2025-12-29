@@ -9,6 +9,7 @@ import { useStakeAmount } from "@/stores";
 import { useAccount, useReadContract } from "wagmi";
 import { CONTRACTS, STAKING_ABI } from "@/lib/contracts";
 import AddPoolModal from "./AddPoolModal";
+import { toFixed2 } from "@/utils/format";
 
 export default function PoolInfo() {
   const { address, isConnected } = useAccount();
@@ -74,8 +75,8 @@ export default function PoolInfo() {
 
   const metrics = [
     { label: "Total Pools", value: activePoolsCount.toString() },
-    { label: "Total Staked", value: activeTotalStaked.toString() },
-    { label: "Reward Rate", value: `${formattedActiveTotalRewardRate}/sec` },
+    { label: "Total Staked", value: toFixed2(activeTotalStaked) },
+    { label: "Total Reward Rate", value: `${toFixed2(Number(formattedActiveTotalRewardRate) * 86400)}/day` },
   ];
 
   return (
@@ -146,7 +147,7 @@ export default function PoolInfo() {
                   className="px-4 py-5 text-center text-base font-medium"
                   style={{ color: 'var(--color-foreground)', width: '18%' }}
                 >
-                  Reward Rate
+                  Pool Reward Rate
                 </th>
                 <th 
                   className="px-4 py-5 text-center text-base font-medium"
@@ -196,13 +197,13 @@ export default function PoolInfo() {
                       className="px-4 py-5 text-base text-right"
                       style={{ color: 'var(--color-foreground)' }}
                     >
-                      {pool.tvl}
+                      {toFixed2(pool.tvl)}
                     </td>
                     <td 
                       className="px-4 py-5 text-base text-right"
                       style={{ color: 'var(--color-foreground)' }}
                     >
-                      {formatUnits(pool.rewardPerSec, tokenDecimals || 18)}/sec
+                      {toFixed2(formatUnits(pool.rewardPerSec * BigInt(86400), tokenDecimals || 18))}/day
                     </td>
                     <td 
                       className="px-4 py-5 text-base text-right"
@@ -226,7 +227,7 @@ export default function PoolInfo() {
                       className="px-4 py-5 text-base text-right"
                       style={{ color: 'var(--color-foreground)' }}
                     >
-                      {pool.userStaked}
+                      {pool.userStaked === 'N/A' ? 'N/A' : toFixed2(pool.userStaked)}
                     </td>
                   </tr>
                 ))
@@ -304,7 +305,7 @@ export default function PoolInfo() {
                       className="px-2 py-3 text-xs text-center"
                       style={{ color: 'var(--color-foreground)' }}
                     >
-                      {pool.tvl}
+                      {toFixed2(pool.tvl)}
                     </td>
                     <td 
                       className="px-2 py-3 text-xs text-center"

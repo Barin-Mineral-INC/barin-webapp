@@ -41,6 +41,7 @@ export default function Header() {
         <div className="flex items-center space-x-2 lg:space-x-4">
           {/* Chain selector - Desktop only */}
           <select
+            hidden={true}
             value={chain}
             onChange={(e) => setChain(e.target.value as 'ethereum' | 'polygon' | 'arbitrum' | 'optimism' | 'base')}
             className="hidden lg:block px-3 py-2 rounded-lg border transition-colors"
