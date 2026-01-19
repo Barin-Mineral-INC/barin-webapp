@@ -13,7 +13,7 @@ export const config = getDefaultConfig({
 
 // Contract addresses
 export const CONTRACTS = {
-  STAKING: '0xDdB4b07b19c409B4634Ffff8Be83C49Ef27b6355' as const,
-  BARIN_TOKEN: '0x9504EC959a6675139863FfBBD826FCe7BAEF9Ad2' as const,
+  STAKING: '0xC67B18cE4368B31f5D0c65eDD941244A44e58C1A' as const,
+  BARIN_TOKEN: '0x559f11777626381e1566fedcf59f454e005316d1' as const,
 } as const;
 
