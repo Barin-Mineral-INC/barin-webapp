@@ -1,13 +1,17 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import { polygon } from 'wagmi/chains';
-import { http } from 'viem';
+import { http, fallback } from 'viem';
 
 export const config = getDefaultConfig({
   appName: 'Barin Staking Dashboard',
   projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || 'your-project-id',
   chains: [polygon],
   transports: {
-    [polygon.id]: http('https://polygon-rpc.com'),
+    [polygon.id]: fallback([
+      http('https://polygon.drpc.org'),
+      http('https://polygon.lava.build'),
+      http('https://polygon.gateway.tenderly.co'),
+    ]),
   },
 });
 
